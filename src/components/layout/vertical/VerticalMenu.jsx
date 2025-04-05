@@ -69,10 +69,21 @@ const VerticalMenu = ({ scrollMenu, dictionary }) => {
         <SubMenu label="Inventory" icon={<i className='tabler-package' />}>
           <MenuItem href={`/products/list`}>{dictionary['navigation'].list}</MenuItem>
           <MenuItem href={`/products/add`}>{dictionary['navigation'].add}</MenuItem>
-          <MenuItem href={`/products/category`}>
+          {/* <MenuItem href={`/products/category`}>
             {dictionary['navigation'].category}
-          </MenuItem>
+          </MenuItem> */}
         </SubMenu>
+
+        <SubMenu label={dictionary['navigation'].orders } icon={<i className='tabler-shopping-cart' />}>
+              <MenuItem href={`/orders/list`}>{dictionary['navigation'].list}</MenuItem>
+              <MenuItem
+                href={`/orders/details/5434`}
+                exactMatch={false}
+                activeUrl='orders/details'
+              >
+                {dictionary['navigation'].details}
+              </MenuItem>
+            </SubMenu>
 
       </Menu>
       {/* <Menu

@@ -163,7 +163,7 @@ const ProductListTable = ({ productData }) => {
       }),
       columnHelper.accessor('stock', {
         header: 'Status',
-        cell: ({ row }) => <Switch defaultChecked={row.original.status} />,
+        cell: ({ row }) => <Switch defaultChecked={row.original.qty} />,
         enableSorting: false
       }),
       columnHelper.accessor('sku', {
