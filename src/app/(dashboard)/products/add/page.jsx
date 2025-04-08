@@ -1,3 +1,6 @@
+// eCommerceProductsAdd.jsx
+// No "use client" needed here since it's a server component
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 
@@ -9,8 +12,12 @@ import ProductVariants from '@views/products/add/ProductVariants'
 import ProductInventory from '@views/products/add/ProductInventory'
 import ProductPricing from '@views/products/add/ProductPricing'
 import ProductOrganize from '@views/products/add/ProductOrganize'
+import { getEcommerceData } from '@/app/server/actions'
+import RawProductToggleTable from '@/views/products/add/RawProductToggleTable'
 
-const eCommerceProductsAdd = () => {
+const eCommerceProductsAdd = async () => {
+  const data = await getEcommerceData()
+
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12 }}>
@@ -23,6 +30,9 @@ const eCommerceProductsAdd = () => {
           </Grid>
           <Grid size={{ xs: 12 }}>
             <ProductImage />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <RawProductToggleTable productData={data?.products} />
           </Grid>
           {/* <Grid size={{ xs: 12 }}>
             <ProductVariants />
