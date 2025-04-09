@@ -85,6 +85,10 @@ const VerticalMenu = ({ scrollMenu, dictionary }) => {
               </MenuItem>
             </SubMenu>
 
+            <MenuItem href='/tasks' icon={<i className='tabler-smart-home' />}>
+          Task
+        </MenuItem>
+
       </Menu>
       {/* <Menu
           popoutMenuOffset={{ mainAxis: 23 }}
