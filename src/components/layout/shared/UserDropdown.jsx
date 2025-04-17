@@ -61,7 +61,7 @@ const UserDropdown = () => {
   }
 
   const handleUserLogout = async () => {
-    // Redirect to login page
+    localStorage.removeItem('userToken')
     router.push('/login')
   }
 
@@ -118,14 +118,14 @@ const UserDropdown = () => {
                     <i className='tabler-settings' />
                     <Typography color='text.primary'>Settings</Typography>
                   </MenuItem>
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
+                  {/* <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-currency-dollar' />
                     <Typography color='text.primary'>Pricing</Typography>
                   </MenuItem>
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-help-circle' />
                     <Typography color='text.primary'>FAQ</Typography>
-                  </MenuItem>
+                  </MenuItem> */}
                   <div className='flex items-center plb-2 pli-3'>
                     <Button
                       fullWidth
