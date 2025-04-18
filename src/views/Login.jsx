@@ -75,6 +75,12 @@ const LoginV2 = ({ mode }) => {
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
+  const handleLoginSubmit = e => {
+    e.preventDefault()
+    // Use router.push with locale: false to prevent automatic locale prefix
+    router.push('/home', undefined, { locale: false })
+  }
+
   const characterIllustration = useImageVariant(
     mode,
     lightIllustration,
@@ -116,10 +122,7 @@ const LoginV2 = ({ mode }) => {
           <form
             noValidate
             autoComplete='off'
-            onSubmit={e => {
-              e.preventDefault()
-              router.push('/')
-            }}
+            onSubmit={handleLoginSubmit}
             className='flex flex-col gap-5'
           >
             <CustomTextField autoFocus fullWidth label='Email or Username' placeholder='Enter your email or username' />
