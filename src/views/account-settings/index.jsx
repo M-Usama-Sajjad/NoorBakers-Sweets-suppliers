@@ -23,7 +23,7 @@ const AccountSettings = ({ tabContentList }) => {
   return (
     <TabContext value={activeTab}>
       <Grid container spacing={6}>
-        <Grid size={{ xs: 12 }}>
+        {/* <Grid size={{ xs: 12 }}>
           <CustomTabList onChange={handleChange} variant='scrollable' pill='true'>
             <Tab label='Account' icon={<i className='tabler-users' />} iconPosition='start' value='account' />
             <Tab label='Security' icon={<i className='tabler-lock' />} iconPosition='start' value='security' />
@@ -41,7 +41,7 @@ const AccountSettings = ({ tabContentList }) => {
             />
             <Tab label='Connections' icon={<i className='tabler-link' />} iconPosition='start' value='connections' />
           </CustomTabList>
-        </Grid>
+        </Grid> */}
         <Grid size={{ xs: 12 }}>
           <TabPanel value={activeTab} className='p-0'>
             {tabContentList[activeTab]}

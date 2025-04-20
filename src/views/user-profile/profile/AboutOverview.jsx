@@ -41,44 +41,31 @@ const renderTeams = teams => {
 
 const AboutOverview = ({ data }) => {
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <Card>
-          <CardContent className='flex flex-col gap-6'>
-            <div className='flex flex-col gap-4'>
-              <Typography className='uppercase' variant='body2' color='text.disabled'>
+   
+        <Card className="w-screen">
+          <CardContent className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
+              <Typography className="uppercase" variant="body2" color="text.disabled">
                 About
               </Typography>
               {data?.about && renderList(data?.about)}
             </div>
-            <div className='flex flex-col gap-4'>
-              <Typography className='uppercase' variant='body2' color='text.disabled'>
+            <div className="flex flex-col gap-4">
+              <Typography className="uppercase" variant="body2" color="text.disabled">
                 Contacts
               </Typography>
               {data?.contacts && renderList(data?.contacts)}
             </div>
-            <div className='flex flex-col gap-4'>
-              <Typography className='uppercase' variant='body2' color='text.disabled'>
+            <div className="flex flex-col gap-4">
+              <Typography className="uppercase" variant="body2" color="text.disabled">
                 Teams
               </Typography>
               {data?.teams && renderTeams(data?.teams)}
             </div>
           </CardContent>
         </Card>
-      </Grid>
-      <Grid size={{ xs: 12 }}>
-        <Card>
-          <CardContent className='flex flex-col gap-6'>
-            <div className='flex flex-col gap-4'>
-              <Typography className='uppercase' variant='body2' color='text.disabled'>
-                Overview
-              </Typography>
-              {data?.overview && renderList(data?.overview)}
-            </div>
-          </CardContent>
-        </Card>
-      </Grid>
-    </Grid>
+     
+    
   )
 }
 

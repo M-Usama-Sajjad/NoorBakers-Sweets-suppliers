@@ -15,9 +15,9 @@ const ConnectionsTab = dynamic(() => import('@views/user-profile/connections'))
 // Vars
 const tabContentList = data => ({
   profile: <ProfileTab data={data?.users.profile} />,
-  teams: <TeamsTab data={data?.users.teams} />,
-  projects: <ProjectsTab data={data?.users.projects} />,
-  connections: <ConnectionsTab data={data?.users.connections} />
+  // teams: <TeamsTab data={data?.users.teams} />,
+  // projects: <ProjectsTab data={data?.users.projects} />,
+  // connections: <ConnectionsTab data={data?.users.connections} />
 })
 
 /**
