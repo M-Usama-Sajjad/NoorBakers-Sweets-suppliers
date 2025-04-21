@@ -19,6 +19,7 @@ import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import classnames from 'classnames'
+import axios from 'axios' // Import Axios
 
 // Component Imports
 import Link from '@components/Link'
@@ -59,6 +60,9 @@ const MaskImg = styled('img')({
 const LoginV2 = ({ mode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
 
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
@@ -75,10 +79,31 @@ const LoginV2 = ({ mode }) => {
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
 
-  const handleLoginSubmit = e => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault()
-    // Use router.push with locale: false to prevent automatic locale prefix
-    router.push('/home', undefined, { locale: false })
+    setError('') // Clear previous errors
+    console.log('Login form submitted:', { email, password })
+
+    try {
+      const response = await axios.post('http://localhost:5000/api/auth/login', {
+        email,
+        password
+      })
+
+      // Check for status 200 and successful response
+      if (response.status === 200 && response.data.success) {
+        // Store token in localStorage
+        localStorage.setItem('token', response.data.token)
+        // Redirect to home page
+        router.push('/home', undefined, { locale: false })
+      } else {
+        // Display error message from server
+        setError(response.data.message || 'Login failed. Please try again.')
+      }
+    } catch (err) {
+      // Handle non-200 status or network errors
+      setError(err.response?.data?.message || 'An error occurred. Please try again later.')
+    }
   }
 
   const characterIllustration = useImageVariant(
@@ -89,7 +114,7 @@ const LoginV2 = ({ mode }) => {
     borderedDarkIllustration
   )
 
-  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
+  const handleClickShowPassword = () => setIsPasswordShown((show) => !show)
 
   return (
     <div className='flex bs-full justify-center'>
@@ -119,24 +144,38 @@ const LoginV2 = ({ mode }) => {
             <Typography variant='h4'>{`Welcome to Noor Bakers & Sweets! 👋🏻`}</Typography>
             <Typography>Please sign-in to your account</Typography>
           </div>
+          {error && (
+            <Typography color='error.main' className='text-center'>
+              {error}
+            </Typography>
+          )}
           <form
             noValidate
             autoComplete='off'
             onSubmit={handleLoginSubmit}
             className='flex flex-col gap-5'
           >
-            <CustomTextField autoFocus fullWidth label='Email or Username' placeholder='Enter your email or username' />
+            <CustomTextField
+              autoFocus
+              fullWidth
+              label='Email or Username'
+              placeholder='Enter your email or username'
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
             <CustomTextField
               fullWidth
               label='Password'
               placeholder='············'
               id='outlined-adornment-password'
               type={isPasswordShown ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               slotProps={{
                 input: {
                   endAdornment: (
                     <InputAdornment position='end'>
-                      <IconButton edge='end' onClick={handleClickShowPassword} onMouseDown={e => e.preventDefault()}>
+                      <IconButton edge='end' onClick={handleClickShowPassword} onMouseDown={(e) => e.preventDefault()}>
                         <i className={isPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
                       </IconButton>
                     </InputAdornment>
