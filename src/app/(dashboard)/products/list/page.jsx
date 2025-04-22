@@ -42,7 +42,7 @@ const eCommerceProductsList = () => {
           productName: product.name,
           category: product.category,
           type:product.type,
-          sku: product.barcode || 'N/A',
+          sku: product.sku || 'N/A',
           qty: product.quantity,
           status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
           image: product.image || '/images/placeholder.png', // Placeholder if no image

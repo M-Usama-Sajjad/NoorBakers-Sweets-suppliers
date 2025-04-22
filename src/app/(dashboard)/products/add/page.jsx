@@ -21,6 +21,8 @@ import ProductInventory from '@views/products/add/ProductInventory'
 import ProductPricing from '@views/products/add/ProductPricing'
 import ProductOrganize from '@views/products/add/ProductOrganize'
 import RawProductToggleTable from '@views/products/add/RawProductToggleTable'
+import { skeletonClasses } from '@mui/material'
+import SkinDefault from '@/@core/svg/SkinDefault'
 
 const eCommerceProductsAdd = () => {
   // State for product form data
@@ -87,7 +89,8 @@ const eCommerceProductsAdd = () => {
         manufacturingDate: productData.manufacturingDate,
         expiryDate: productData.expiryDate,
         status: productData.status === 'Published' ? 'active' : 'expired',
-        isActive: productData.isActive
+        isActive: productData.isActive,
+        sku: productData.sku || undefined,
       }
 
       const response = await axios.post('http://localhost:5001/api/products/', payload, {

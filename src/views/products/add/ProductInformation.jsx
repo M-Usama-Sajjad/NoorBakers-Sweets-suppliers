@@ -158,7 +158,7 @@ const ProductInformation = ({ productData, onChange }) => {
               onChange={e => onChange('sku', e.target.value)}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
+          {/* <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               fullWidth
               label='Barcode'
@@ -166,7 +166,7 @@ const ProductInformation = ({ productData, onChange }) => {
               value={productData.barcode}
               onChange={e => onChange('barcode', e.target.value)}
             />
-          </Grid>
+          </Grid> */}
         </Grid>
         <Typography className='mbe-1'>Description (Optional)</Typography>
         <Card className='p-0 border shadow-none'>

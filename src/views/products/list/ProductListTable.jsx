@@ -171,7 +171,7 @@ const ProductListTable = ({ productData }) => {
         enableSorting: false
       }),
       columnHelper.accessor('sku', {
-        header: 'Barcode',
+        header: 'SKU',
         cell: ({ row }) => <Typography>{row.original.sku}</Typography>
       }),
       columnHelper.accessor('qty', {
