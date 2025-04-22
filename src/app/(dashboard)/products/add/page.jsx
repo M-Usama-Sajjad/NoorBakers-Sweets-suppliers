@@ -88,7 +88,7 @@ const eCommerceProductsAdd = () => {
         batchNumber: productData.batchNumber,
         manufacturingDate: productData.manufacturingDate,
         expiryDate: productData.expiryDate,
-        status: productData.status === 'Published' ? 'active' : 'expired',
+        status: productData.status ,
         isActive: productData.isActive,
         sku: productData.sku || undefined,
       }

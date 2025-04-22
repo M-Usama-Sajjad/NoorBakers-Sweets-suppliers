@@ -186,20 +186,22 @@ const ProductListTable = ({ productData }) => {
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton>
-              <i className='tabler-edit text-textSecondary' />
-            </IconButton>
+            <Link href={`/products/edit/${row.original.id}`}>
+        <IconButton>
+          <i className='tabler-edit text-textSecondary' />
+        </IconButton>
+      </Link>
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
-                { text: 'Download', icon: 'tabler-download' },
+                // { text: 'Download', icon: 'tabler-download' },
                 {
                   text: 'Delete',
                   icon: 'tabler-trash',
                   menuItemProps: { onClick: () => setData(data?.filter(product => product.id !== row.original.id)) }
                 },
-                { text: 'Duplicate', icon: 'tabler-copy' }
+                // { text: 'Duplicate', icon: 'tabler-copy' }
               ]}
             />
           </div>
