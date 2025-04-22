@@ -1,42 +1,91 @@
+'use client'
+
+// React Imports
+import { useState, useEffect } from 'react'
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
+
+// Third-party Imports
+import axios from 'axios'
 
 // Component Imports
 import ProductListTable from '@views/products/list/ProductListTable'
 import ProductCard from '@views/products/list/ProductCard'
 
-// Data Imports
-import { getEcommerceData } from '@/app/server/actions'
+const eCommerceProductsList = () => {
+  // State for product data, loading, and errors
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
-/**
- * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
- * ! `.env` file found at root of your project and also update the API endpoints like `/apps/ecommerce` in below example.
- * ! Also, remove the above server action import and the action itself from the `src/app/server/actions.ts` file to clean up unused code
- * ! because we've used the server action for getting our static data.
- */
-/* const getEcommerceData = async () => {
-  // Vars
-  const res = await fetch(`${process.env.API_URL}/apps/ecommerce`)
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          throw new Error('No authentication token found. Please log in.')
+        }
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch ecommerce data')
+        const response = await axios.get('http://localhost:5001/api/products/', {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+         console.log(response.data)
+        // Map API data to table's expected format
+        const mappedProducts = response?.data?.data?.map(product => ({          id: product._id,
+          productName: product.name,
+          category: product.category,
+          type:product.type,
+          sku: product.barcode || 'N/A',
+          qty: product.quantity,
+          status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
+          image: product.image || '/images/placeholder.png', // Placeholder if no image
+          productBrand: product.productBrand || 'Unknown' // Placeholder
+        }))
+
+        setProducts(mappedProducts)
+        setLoading(false)
+      } catch (err) {
+        setError(err.message || 'Failed to fetch products')
+        setSnackbarOpen(true)
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+
+  // Handle snackbar close
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false)
   }
 
-  return res.json()
-} */
-const eCommerceProductsList = async () => {
-  // Vars
-  const data = await getEcommerceData()
-
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <ProductCard />
+    <>
+      <Grid container spacing={6}>
+        <Grid size={{ xs: 12 }}>
+          <ProductCard />
+        </Grid>
+        <Grid size={{ xs: 12 }}>
+          {loading ? (
+           " Loading products..."
+          ) : (
+            <ProductListTable productData={products} />
+          )}
+        </Grid>
       </Grid>
-      <Grid size={{ xs: 12 }}>
-        <ProductListTable productData={data?.products} />
-      </Grid>
-    </Grid>
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+          {error}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }
 

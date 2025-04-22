@@ -112,7 +112,7 @@ const EditorToolbar = ({ editor }) => {
   )
 }
 
-const ProductInformation = () => {
+const ProductInformation = ({ productData, onChange }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -129,7 +129,10 @@ const ProductInformation = () => {
       <p>
         Keep your account secure with authentication step.
       </p>
-    `
+    `,
+    onUpdate: ({ editor }) => {
+      onChange('description', editor.getHTML())
+    }
   })
 
   return (
@@ -138,13 +141,31 @@ const ProductInformation = () => {
       <CardContent>
         <Grid container spacing={6} className='mbe-6'>
           <Grid size={{ xs: 12 }}>
-            <CustomTextField fullWidth label='Product Name' placeholder='Red Valvet Cake' />
+            <CustomTextField
+              fullWidth
+              label='Product Name'
+              placeholder='Red Velvet Cake'
+              value={productData.name}
+              onChange={e => onChange('name', e.target.value)}
+            />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomTextField fullWidth label='SKU' placeholder='FXSK123U' />
+            <CustomTextField
+              fullWidth
+              label='SKU'
+              placeholder='FXSK123U'
+              value={productData.sku || ''}
+              onChange={e => onChange('sku', e.target.value)}
+            />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }}>
-            <CustomTextField fullWidth label='Barcode' placeholder='0123-4567' />
+            <CustomTextField
+              fullWidth
+              label='Barcode'
+              placeholder='0123-4567'
+              value={productData.barcode}
+              onChange={e => onChange('barcode', e.target.value)}
+            />
           </Grid>
         </Grid>
         <Typography className='mbe-1'>Description (Optional)</Typography>

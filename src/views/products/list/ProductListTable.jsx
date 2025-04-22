@@ -44,11 +44,10 @@ import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 // Util Imports
-// import { getLocalizedUrl } from '@/utils/i18n'
+import { getLocalizedUrl } from '@/utils/i18n'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
-import { getLocalizedUrl } from '@/utils/i18n'
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   // Rank the item
@@ -104,13 +103,18 @@ const columnHelper = createColumnHelper()
 const ProductListTable = ({ productData }) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[productData])
-  const [filteredData, setFilteredData] = useState(data)
+  const [data, setData] = useState(productData)
+  const [filteredData, setFilteredData] = useState(productData)
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Hooks
   const { lang: locale } = useParams()
-  console.log("locale: ", locale)
+
+  // Update data when productData changes
+  useEffect(() => {
+    setData(productData)
+    setFilteredData(productData)
+  }, [productData])
 
   const columns = useMemo(
     () => [
@@ -154,8 +158,8 @@ const ProductListTable = ({ productData }) => {
         header: 'Category',
         cell: ({ row }) => (
           <div className='flex items-center gap-4'>
-            <CustomAvatar skin='light' color={productCategoryObj[row.original.category].color} size={30}>
-              <i className={classnames(productCategoryObj[row.original.category].icon, 'text-lg')} />
+            <CustomAvatar skin='light' color={productCategoryObj[row.original.category]?.color || 'default'} size={30}>
+              <i className={classnames(productCategoryObj[row.original.category]?.icon || 'tabler-box', 'text-lg')} />
             </CustomAvatar>
             <Typography color='text.primary'>{row.original.category}</Typography>
           </div>
@@ -163,26 +167,20 @@ const ProductListTable = ({ productData }) => {
       }),
       columnHelper.accessor('stock', {
         header: 'Status',
-        cell: ({ row }) => <Switch defaultChecked={row.original.qty} />,
+        cell: ({ row }) => <Switch checked={row.original.status === 'Published'} />,
         enableSorting: false
       }),
       columnHelper.accessor('sku', {
-        header: 'SKU',
+        header: 'Barcode',
         cell: ({ row }) => <Typography>{row.original.sku}</Typography>
       }),
-      // columnHelper.accessor('price', {
-      //   header: 'Price',
-      //   cell: ({ row }) => <Typography>{row.original.price}</Typography>
-      // }),
       columnHelper.accessor('qty', {
-        header: 'QTY',
+        header: 'Quantity',
         cell: ({ row }) => <Typography>{row.original.qty}</Typography>
       }),
-      columnHelper.accessor('status', {
+      columnHelper.accessor('type', {
         header: 'Type',
-          cell: ({ row }) => <Typography>{row.original.type}</Typography>
-
-        
+        cell: ({ row }) => <Typography>{row.original.type}</Typography>
       }),
       columnHelper.accessor('actions', {
         header: 'Actions',
@@ -209,7 +207,6 @@ const ProductListTable = ({ productData }) => {
         enableSorting: false
       })
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data, filteredData]
   )
 
@@ -228,12 +225,11 @@ const ProductListTable = ({ productData }) => {
         pageSize: 10
       }
     },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
+    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -278,8 +274,7 @@ const ProductListTable = ({ productData }) => {
               variant='contained'
               component={Link}
               className='max-sm:is-full is-auto'
-              // href={getLocalizedUrl('/apps/ecommerce/products/add', locale)}
-              href="/products/add"
+              href='/products/add'
               startIcon={<i className='tabler-plus' />}
             >
               Add Product
