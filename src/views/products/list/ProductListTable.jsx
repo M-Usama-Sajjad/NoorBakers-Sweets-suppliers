@@ -19,6 +19,8 @@ import Switch from '@mui/material/Switch'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
 import Typography from '@mui/material/Typography'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -35,6 +37,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel
 } from '@tanstack/react-table'
+import axios from 'axios'
 
 // Component Imports
 import TableFilters from './TableFilters'
@@ -106,6 +109,9 @@ const ProductListTable = ({ productData }) => {
   const [data, setData] = useState(productData)
   const [filteredData, setFilteredData] = useState(productData)
   const [globalFilter, setGlobalFilter] = useState('')
+  const [open, setOpen] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [message, setMessage] = useState('')
 
   // Hooks
   const { lang: locale } = useParams()
@@ -115,6 +121,43 @@ const ProductListTable = ({ productData }) => {
     setData(productData)
     setFilteredData(productData)
   }, [productData])
+
+  // Handle snackbar close
+  const handleClose = () => {
+    setOpen(false)
+  }
+
+  // Delete product via API
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to delete this product?')) {
+      return
+    }
+
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        throw new Error('No authentication token found. Please log in.')
+      }
+
+      await axios.delete(`http://localhost:5001/api/products/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      // Update local state
+      setData(prev => prev?.filter(product => product.id !== id))
+      setFilteredData(prev => prev?.filter(product => product.id !== id))
+
+      setSuccess(true)
+      setMessage('Product deleted successfully!')
+      setOpen(true)
+    } catch (error) {
+      setSuccess(false)
+      setMessage(error.response?.data?.message || 'Failed to delete product')
+      setOpen(true)
+    }
+  }
 
   const columns = useMemo(
     () => [
@@ -187,21 +230,19 @@ const ProductListTable = ({ productData }) => {
         cell: ({ row }) => (
           <div className='flex items-center'>
             <Link href={`/products/edit/${row.original.id}`}>
-        <IconButton>
-          <i className='tabler-edit text-textSecondary' />
-        </IconButton>
-      </Link>
+              <IconButton>
+                <i className='tabler-edit text-textSecondary' />
+              </IconButton>
+            </Link>
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
               options={[
-                // { text: 'Download', icon: 'tabler-download' },
                 {
                   text: 'Delete',
                   icon: 'tabler-trash',
-                  menuItemProps: { onClick: () => setData(data?.filter(product => product.id !== row.original.id)) }
-                },
-                // { text: 'Duplicate', icon: 'tabler-copy' }
+                  menuItemProps: { onClick: () => handleDelete(row.original.id) }
+                }
               ]}
             />
           </div>
@@ -348,6 +389,11 @@ const ProductListTable = ({ productData }) => {
           }}
         />
       </Card>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }
