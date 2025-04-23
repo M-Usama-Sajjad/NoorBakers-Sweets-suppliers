@@ -1,40 +1,104 @@
+'use client';
+
+// React Imports
+import { useState, useEffect } from 'react';
+
 // Next Imports
-import { redirect } from 'next/navigation'
+import { useParams } from 'next/navigation';
+
+// Third-party Imports
+import axios from 'axios';
 
 // Component Imports
-import OrderDetails from '@views/orders/details'
+import OrderDetails from '@views/orders/details';
 
-// Data Imports
-import { getEcommerceData } from '@/app/server/actions'
+// Map backend paymentStatus to paymentStatus keys
+const paymentStatusMap = {
+  paid: 1,
+  pending: 2,
+  cancelled: 3,
+  failed: 4,
+};
 
-/**
- * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
- * ! `.env` file found at root of your project and also update the API endpoints like `/apps/ecommerce` in below example.
- * ! Also, remove the above server action import and the action itself from the `src/app/server/actions.ts` file to clean up unused code
- * ! because we've used the server action for getting our static data.
- */
-/* const getEcommerceData = async () => {
-  // Vars
-  const res = await fetch(`${process.env.API_URL}/apps/ecommerce`)
+// Valid status values from OrderDetailHeader
+const validStatuses = ['Delivered', 'Out for Delivery', 'Ready to Pickup', 'Dispatched'];
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch ecommerce data')
-  }
+export default function OrderDetailsPage() {
+  const { id } = useParams(); // Get dynamic id from URL
+  const [orderData, setOrderData] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  return res.json()
-} */
-const OrderDetailsPage = async props => {
-  const params = await props.params
+  useEffect(() => {
+    const fetchOrder = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          throw new Error('No authentication token found');
+        }
 
-  // Vars
-  const data = await getEcommerceData()
-  const filteredData = data?.orderData.filter(item => item.order === params.id)[0]
+        const response = await axios.get(`http://localhost:5001/api/orders/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-  if (!filteredData) {
-    redirect('/not-found')
-  }
+        const order = response.data.data;
+        if (!order) {
+          throw new Error('Order not found');
+        }
 
-  return filteredData ? <OrderDetails orderData={filteredData} order={params.id} /> : null
+        // Log raw status for debugging
+        console.log('Raw API status:', order.status);
+
+        // Map paymentStatus to numeric key
+        const paymentStatusKey = paymentStatusMap[order.paymentStatus.toLowerCase()] || 2; // Default to "Pending" (2)
+
+        // Capitalize status and validate
+        const rawStatus = order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending';
+        const formattedStatus = validStatuses.includes(rawStatus) ? rawStatus : 'Pending';
+
+        // Format data for OrderDetails component
+        const formattedData = {
+          id: order._id, // e.g., "6808fdad9491417b2bc57d56"
+          order: order.orderNumber, // e.g., "349"
+          date: new Date(order.createdAt), // e.g., 2025-04-23
+          time: new Date(order.createdAt).toLocaleTimeString(), // e.g., "2:48:13 PM"
+          customer: order.shopkeeper?.name || 'Unknown', // e.g., "Jane Smith"
+          email: order.shopkeeper?.email || '',
+          avatar: null, // Adjust if avatar data available
+          status: formattedStatus, // e.g., "Delivered" or "Pending"
+          supplier: order.supplier?.name || 'Unknown', // e.g., "Jane Smith"
+          products: order.products.map(item => ({
+            product: item.product?.name || 'Unknown Product', // e.g., "aoisjs" or "Unknown Product"
+            unit: item.product?.unit || '', // e.g., "pieces" or ""
+            price: item.price || item.product?.price || 0, // e.g., 5.99 for first, 10 for second
+            quantity: item.quantity || 0, // e.g., 1 or 2
+          })) || [],
+          totalAmount: order.totalAmount, // e.g., 109.9
+          payment: paymentStatusKey, // e.g., 2 for "pending"
+          paymentMethod: order.paymentMethod, // e.g., "bank_transfer"
+          notes: order.notes, // e.g., "Urgent delivery required."
+        };
+
+        setOrderData(formattedData);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.message || err.message);
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchOrder();
+    }
+  }, [id]);
+
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+  if (!orderData) return <div>Order not found</div>;
+
+  console.log('orderData in main page:', orderData);
+
+  return <OrderDetails orderData={orderData} order={orderData.order} />;
 }
-
-export default OrderDetailsPage

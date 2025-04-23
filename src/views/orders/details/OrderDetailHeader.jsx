@@ -1,3 +1,5 @@
+'use client'
+
 // MUI Imports
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
@@ -13,6 +15,7 @@ export const paymentStatus = {
   3: { text: 'Cancelled', color: 'secondary' },
   4: { text: 'Failed', color: 'error' }
 }
+
 export const statusChipColor = {
   Delivered: { color: 'success' },
   'Out for Delivery': { color: 'primary' },
@@ -21,12 +24,20 @@ export const statusChipColor = {
 }
 
 const OrderDetailHeader = ({ orderData, order }) => {
+  // Log props for debugging
+  console.log('OrderDetailHeader props:', { orderData, order })
+
   // Vars
   const buttonProps = (children, color, variant) => ({
     children,
     color,
     variant
   })
+
+  // Fallback for status chip color
+  const getStatusColor = (status) => {
+    return statusChipColor[status]?.color || 'default' // Fallback to 'default'
+  }
 
   return (
     <div className='flex flex-wrap justify-between sm:items-center max-sm:flex-col gap-y-4'>
@@ -35,14 +46,14 @@ const OrderDetailHeader = ({ orderData, order }) => {
           <Typography variant='h5'>{`Order #${order}`}</Typography>
           <Chip
             variant='tonal'
-            label={orderData?.status}
-            color={statusChipColor[orderData?.status || ''].color}
+            label={orderData?.status || 'Unknown'}
+            color={getStatusColor(orderData?.status)}
             size='small'
           />
           <Chip
             variant='tonal'
-            label={paymentStatus[orderData?.payment ?? 0].text}
-            color={paymentStatus[orderData?.payment ?? 0].color}
+            label={paymentStatus[orderData?.payment ?? 2].text}
+            color={paymentStatus[orderData?.payment ?? 2].color}
             size='small'
           />
         </div>

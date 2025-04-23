@@ -33,62 +33,29 @@ import Link from '@components/Link'
 import tableStyles from '@core/styles/table.module.css'
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
-  // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value)
-
-  // Store the itemRank info
-  addMeta({
-    itemRank
-  })
-
-  // Return if the item should be filtered in/out
+  addMeta({ itemRank })
   return itemRank.passed
 }
 
-const orderData = [
-  {
-    productName: 'OnePlus 7 Pro',
-    productImage: '/images/apps/ecommerce/product-21.png',
-    brand: 'OnePluse',
-    price: 799,
-    quantity: 1,
-    total: 799
-  },
-  {
-    productName: 'Magic Mouse',
-    productImage: '/images/apps/ecommerce/product-22.png',
-    brand: 'Google',
-    price: 89,
-    quantity: 1,
-    total: 89
-  },
-  {
-    productName: 'Wooden Chair',
-    productImage: '/images/apps/ecommerce/product-23.png',
-    brand: 'Insofar',
-    price: 289,
-    quantity: 2,
-    total: 578
-  },
-  {
-    productName: 'Air Jorden',
-    productImage: '/images/apps/ecommerce/product-24.png',
-    brand: 'Nike',
-    price: 299,
-    quantity: 2,
-    total: 598
-  }
-]
-
-// Column Definitions
-const columnHelper = createColumnHelper()
-
-const OrderTable = () => {
+const OrderTable = ({ orderData, order }) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
-
-  const [data, setData] = useState(...[orderData])
   const [globalFilter, setGlobalFilter] = useState('')
+
+  // Transform orderData.products to match expected structure
+  const tableData = useMemo(() => {
+    return orderData.products.map(item => ({
+      productName: item.product,
+      brand: 'Generic', // Default since brand is not in API
+      price: item.price,
+      quantity: item.quantity,
+      total: (item.price * item.quantity).toFixed(2) // Compute total
+    }))
+  }, [orderData.products])
+
+  // Define columnHelper
+  const columnHelper = createColumnHelper()
 
   const columns = useMemo(
     () => [
@@ -117,20 +84,17 @@ const OrderTable = () => {
       columnHelper.accessor('productName', {
         header: 'Product',
         cell: ({ row }) => (
-          <div className='flex items-center gap-3'>
-            <img src={row.original.productImage} alt={row.original.productName} height={34} className='rounded' />
-            <div className='flex flex-col items-start'>
-              <Typography color='text.primary' className='font-medium'>
-                {row.original.productName}
-              </Typography>
-              <Typography variant='body2'>{row.original.brand}</Typography>
-            </div>
+          <div className='flex flex-col items-start'>
+            <Typography color='text.primary' className='font-medium'>
+              {row.original.productName}
+            </Typography>
+            <Typography variant='body2'>{row.original.brand}</Typography>
           </div>
         )
       }),
       columnHelper.accessor('price', {
         header: 'Price',
-        cell: ({ row }) => <Typography>{`$${row.original.price}`}</Typography>
+        cell: ({ row }) => <Typography>{`$${row.original.price.toFixed(2)}`}</Typography>
       }),
       columnHelper.accessor('quantity', {
         header: 'Qty',
@@ -141,12 +105,11 @@ const OrderTable = () => {
         cell: ({ row }) => <Typography>{`$${row.original.total}`}</Typography>
       })
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
 
   const table = useReactTable({
-    data: data,
+    data: tableData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -160,12 +123,11 @@ const OrderTable = () => {
         pageSize: 10
       }
     },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
+    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -183,21 +145,19 @@ const OrderTable = () => {
               {headerGroup.headers.map(header => (
                 <th key={header.id}>
                   {header.isPlaceholder ? null : (
-                    <>
-                      <div
-                        className={classnames({
-                          'flex items-center': header.column.getIsSorted(),
-                          'cursor-pointer select-none': header.column.getCanSort()
-                        })}
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {{
-                          asc: <i className='tabler-chevron-up text-xl' />,
-                          desc: <i className='tabler-chevron-down text-xl' />
-                        }[header.column.getIsSorted()] ?? null}
-                      </div>
-                    </>
+                    <div
+                      className={classnames({
+                        'flex items-center': header.column.getIsSorted(),
+                        'cursor-pointer select-none': header.column.getCanSort()
+                      })}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                      {{
+                        asc: <i className='tabler-chevron-up text-xl' />,
+                        desc: <i className='tabler-chevron-down text-xl' />
+                      }[header.column.getIsSorted()] ?? null}
+                    </div>
                   )}
                 </th>
               ))}
@@ -217,15 +177,13 @@ const OrderTable = () => {
             {table
               .getRowModel()
               .rows.slice(0, table.getState().pagination.pageSize)
-              .map(row => {
-                return (
-                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                    {row.getVisibleCells().map(cell => (
-                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                    ))}
-                  </tr>
-                )
-              })}
+              .map(row => (
+                <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                  {row.getVisibleCells().map(cell => (
+                    <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                  ))}
+                </tr>
+              ))}
           </tbody>
         )}
       </table>
@@ -233,7 +191,15 @@ const OrderTable = () => {
   )
 }
 
-const OrderDetailsCard = () => {
+const OrderDetailsCard = ({ orderData, order }) => {
+  // Compute totals from products
+  const subtotal = orderData.products
+    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .toFixed(2)
+  const shippingFee = 2 // Default, adjust if API provides
+  const tax = 28 // Default, adjust if API provides
+  const total = orderData.totalAmount.toFixed(2) // Use API totalAmount
+
   return (
     <Card>
       <CardHeader
@@ -244,7 +210,7 @@ const OrderDetailsCard = () => {
           </Typography>
         }
       />
-      <OrderTable />
+      <OrderTable orderData={orderData} order={order} />
       <CardContent className='flex justify-end'>
         <div>
           <div className='flex items-center gap-12'>
@@ -252,7 +218,7 @@ const OrderDetailsCard = () => {
               Subtotal:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2,093
+              ${subtotal}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -260,7 +226,7 @@ const OrderDetailsCard = () => {
               Shipping Fee:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2
+              ${shippingFee}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -268,7 +234,7 @@ const OrderDetailsCard = () => {
               Tax:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $28
+              ${tax}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -276,7 +242,7 @@ const OrderDetailsCard = () => {
               Total:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2113
+              ${total}
             </Typography>
           </div>
         </div>

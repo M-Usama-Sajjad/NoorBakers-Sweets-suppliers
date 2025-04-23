@@ -95,11 +95,16 @@ const columnHelper = createColumnHelper()
 const OrderListTable = ({ orderData }) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[orderData])
+  const [data, setData] = useState(orderData)
   const [globalFilter, setGlobalFilter] = useState('')
 
   // Hooks
   const { lang: locale } = useParams()
+
+  // Update data when orderData changes
+  useEffect(() => {
+    setData(orderData)
+  }, [orderData])
 
   // Vars
   const paypal = '/images/apps/ecommerce/paypal.png'
@@ -134,8 +139,7 @@ const OrderListTable = ({ orderData }) => {
         cell: ({ row }) => (
           <Typography
             component={Link}
-            // href={getLocalizedUrl(`/apps/ecommerce/orders/details/${row.original.order}`, locale)}
-            href={'/orders/details/${row.original.order}'}
+            href={`/orders/details/${row.original.order}`}
             color='primary.main'
           >{`#${row.original.order}`}</Typography>
         )
@@ -154,7 +158,6 @@ const OrderListTable = ({ orderData }) => {
             <div className='flex flex-col'>
               <Typography
                 component={Link}
-                // href={getLocalizedUrl('/apps/ecommerce/customers/details/879861', locale)}
                 href={'/customers/details/879861'}
                 color='text.primary'
                 className='font-medium hover:text-primary'
@@ -187,7 +190,7 @@ const OrderListTable = ({ orderData }) => {
         cell: ({ row }) => (
           <Chip
             label={row.original.status}
-            color={statusChipColor[row.original.status].color}
+            color={statusChipColor[row.original.status]?.color || 'default'}
             variant='tonal'
             size='small'
           />
@@ -213,6 +216,7 @@ const OrderListTable = ({ orderData }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
+            {console.log('Row data:', row.original)}
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
@@ -220,9 +224,9 @@ const OrderListTable = ({ orderData }) => {
                 {
                   text: 'View',
                   icon: 'tabler-eye',
-                  // href: getLocalizedUrl(`/apps/ecommerce/orders/details/${row.original.order}`, locale),
-                  href: `/orders/details/${row.original.order}`,
-                  linkProps: { className: 'flex items-center gap-2 is-full plb-2 pli-4' }
+                  href: row.original.id ? `/orders/details/${row.original.id}` : '#',
+                  linkProps: { className: 'flex items-center gap-2 is-full plb-2 pli-4' },
+                  menuItemProps: { onClick: () => console.log('Navigating to:', row.original.id ? `/orders/details/${row.original.id}` : 'No ID') }
                 },
                 {
                   text: 'Delete',
@@ -239,7 +243,6 @@ const OrderListTable = ({ orderData }) => {
         enableSorting: false
       })
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [data]
   )
 
@@ -258,12 +261,11 @@ const OrderListTable = ({ orderData }) => {
         pageSize: 10
       }
     },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
+    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
-    getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
+    getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -382,7 +384,6 @@ const OrderListTable = ({ orderData }) => {
         }}
       />
     </Card>
-    
   )
 }
 

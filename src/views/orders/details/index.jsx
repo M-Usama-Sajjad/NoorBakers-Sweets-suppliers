@@ -18,7 +18,7 @@ const OrderDetails = ({ orderData, order }) => {
       <Grid size={{ xs: 12, md: 8 }}>
         <Grid container spacing={6}>
           <Grid size={{ xs: 12 }}>
-            <OrderDetailsCard />
+            <OrderDetailsCard orderData={orderData} order={orderData.order} />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <ShippingActivity order={order} />
