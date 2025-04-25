@@ -61,7 +61,7 @@ const UserDropdown = () => {
   }
 
   const handleUserLogout = async () => {
-    localStorage.removeItem('userToken')
+    localStorage.removeItem('token')
     router.push('/login')
   }
 

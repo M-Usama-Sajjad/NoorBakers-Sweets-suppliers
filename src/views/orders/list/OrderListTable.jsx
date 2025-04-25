@@ -216,7 +216,7 @@ const OrderListTable = ({ orderData }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            {console.log('Row data:', row.original)}
+            {/* {console.log('Row data:', row.original)} */}
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'

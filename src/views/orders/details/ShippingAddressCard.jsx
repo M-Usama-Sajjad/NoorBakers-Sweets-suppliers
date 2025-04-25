@@ -24,7 +24,7 @@ const data = {
   contact: '+1 (609) 972-22-22'
 }
 
-const ShippingAddress = () => {
+const ShippingAddress = ({orderData}) => {
   // Vars
   const typographyProps = (children, color, className) => ({
     children,
@@ -45,10 +45,8 @@ const ShippingAddress = () => {
           />
         </div>
         <div className='flex flex-col'>
-          <Typography>45 Roker Terrace</Typography>
-          <Typography>Latheronwheel</Typography>
-          <Typography>KW5 8NW, London</Typography>
-          <Typography>UK</Typography>
+          <Typography>{orderData?.address}</Typography>
+          
         </div>
       </CardContent>
     </Card>

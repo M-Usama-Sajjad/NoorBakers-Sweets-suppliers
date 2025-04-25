@@ -85,13 +85,13 @@ const LoginV2 = ({ mode }) => {
     console.log('Login form submitted:', { email, password })
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post('http://localhost:5001/api/auth/login', {
         email,
         password
       })
 
       // Check for status 200 and successful response
-      if (response.status === 200 && response.data.success) {
+      if (response.status === 200 || response.status ==201 && response.data.success) {
         // Store token in localStorage
         localStorage.setItem('token', response.data.token)
         // Redirect to home page
@@ -190,7 +190,7 @@ const LoginV2 = ({ mode }) => {
               </Typography>
             </div>
             <Button fullWidth variant='contained' type='submit'>
-              Login
+              Login to your account
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>New on our platform?</Typography>

@@ -8,7 +8,7 @@ const AuthCheck = () => {
     const pathname = usePathname()
 
     useEffect(() => {
-        const token = localStorage.getItem('userToken')
+        const token = localStorage.getItem('token')
         const isLoginPage = pathname === '/login'
 
         if (token && isLoginPage) {

@@ -55,17 +55,17 @@ const CustomerDetails = ({ orderData }) => {
             <Typography color='text.primary' className='font-medium'>
               {orderData?.customer}
             </Typography>
-            <Typography>Customer ID: #47389</Typography>
+            {/* <Typography>Customer ID: #47389</Typography> */}
           </div>
         </div>
-        <div className='flex items-center gap-3'>
+        {/* <div className='flex items-center gap-3'>
           <CustomAvatar skin='light' color='success' size={40}>
             <i className='tabler-shopping-cart' />
           </CustomAvatar>
           <Typography color='text.primary' className='font-medium'>
             12 Orders
           </Typography>
-        </div>
+        </div> */}
         <div className='flex flex-col gap-1'>
           <div className='flex justify-between items-center'>
             <Typography color='text.primary' className='font-medium'>
@@ -79,7 +79,7 @@ const CustomerDetails = ({ orderData }) => {
             />
           </div>
           <Typography>Email: {orderData?.email}</Typography>
-          <Typography>Mobile: +1 (609) 972-22-22</Typography>
+          <Typography>{orderData.phone}</Typography>
         </div>
       </CardContent>
     </Card>

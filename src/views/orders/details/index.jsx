@@ -31,7 +31,7 @@ const OrderDetails = ({ orderData, order }) => {
             <CustomerDetails orderData={orderData} />
           </Grid>
           <Grid size={{ xs: 12 }}>
-            <ShippingAddress />
+            <ShippingAddress orderData={orderData} order={orderData.order} />
           </Grid>
           <Grid size={{ xs: 12 }}>
             <BillingAddress />

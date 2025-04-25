@@ -49,14 +49,14 @@ export default function OrderDetailsPage() {
         }
 
         // Log raw status for debugging
-        console.log('Raw API status:', order.status);
+        console.log(response.data,"hiiiiii");
 
         // Map paymentStatus to numeric key
         const paymentStatusKey = paymentStatusMap[order.paymentStatus.toLowerCase()] || 2; // Default to "Pending" (2)
 
         // Capitalize status and validate
-        const rawStatus = order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending';
-        const formattedStatus = validStatuses.includes(rawStatus) ? rawStatus : 'Pending';
+        // const rawStatus = order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending';
+        // const formattedStatus = validStatuses.includes(rawStatus) ? rawStatus : 'Pending';
 
         // Format data for OrderDetails component
         const formattedData = {
@@ -66,8 +66,11 @@ export default function OrderDetailsPage() {
           time: new Date(order.createdAt).toLocaleTimeString(), // e.g., "2:48:13 PM"
           customer: order.shopkeeper?.name || 'Unknown', // e.g., "Jane Smith"
           email: order.shopkeeper?.email || '',
+          phone: order.shopkeeper?.phone || '', // e.g., "+1 234 567 8900"
+          address: order.shopkeeper?.address || '', // e.g., "123 Main St, City, Country"
+
           avatar: null, // Adjust if avatar data available
-          status: formattedStatus, // e.g., "Delivered" or "Pending"
+          status: order.status, // e.g., "Delivered" or "Pending"
           supplier: order.supplier?.name || 'Unknown', // e.g., "Jane Smith"
           products: order.products.map(item => ({
             product: item.product?.name || 'Unknown Product', // e.g., "aoisjs" or "Unknown Product"
@@ -98,7 +101,7 @@ export default function OrderDetailsPage() {
   if (error) return <div>Error: {error}</div>;
   if (!orderData) return <div>Order not found</div>;
 
-  console.log('orderData in main page:', orderData);
+  // console.log('orderData in main page:', orderData);
 
   return <OrderDetails orderData={orderData} order={orderData.order} />;
 }

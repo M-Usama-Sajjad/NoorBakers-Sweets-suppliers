@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback, useEffect } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -36,6 +36,9 @@ import {
   getSortedRowModel
 } from '@tanstack/react-table'
 
+// Axios Import
+import axios from 'axios'
+
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 import OptionMenu from '@core/components/option-menu'
@@ -67,31 +70,45 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 const columnHelper = createColumnHelper()
 
 const TaskListTable = () => {
-  const initialTaskData = [
-    {
-      id: 1,
-      name: "RoomTemperature",
-      detail: "Monitor room temperature every hour.\nAdjust AC if needed.\nRecord readings.\nCheck vents.\nEnsure proper airflow.\nReport anomalies.",
-      createdAt: new Date(),
-      markdone: false
-    },
-    {
-      id: 2,
-      name: "CleanRoom",
-      detail: "Sweep and mop the floor.\nDust surfaces.",
-      createdAt: new Date(),
-      markdone: true
-    }
-  ]
-
   const [rowSelection, setRowSelection] = useState({})
-  const [tasks, setTasks] = useState(initialTaskData)
+  const [tasks, setTasks] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [open, setOpen] = useState(false) // For dialog
+  const [open, setOpen] = useState(false) // For add task dialog
   const [name, setName] = useState('')
   const [detail, setDetail] = useState('')
+  const [correctiveActionsOpen, setCorrectiveActionsOpen] = useState(false) // For corrective actions dialog
+  const [correctiveActions, setCorrectiveActions] = useState('')
+  const [selectedTaskId, setSelectedTaskId] = useState(null)
 
   const { lang: locale } = useParams()
+
+  // Fetch tasks from API on component mount
+  useEffect(() => {
+    const fetchTasks = async () => {
+      try {
+        const token = localStorage.getItem('token') // Retrieve token from localStorage
+        const response = await axios.get('http://localhost:5001/api/tasks/', {
+          headers: {
+            Authorization: `Bearer ${token}` // Include token in Authorization header
+          }
+        })
+        // Map API response to match frontend schema
+        console.log(response.data.data, 'hiiiiii')
+        const mappedTasks = response.data.data.map(task => ({
+          id: task._id,
+          name: task.title,
+          detail: task.description,
+          createdAt: new Date(task.createdAt),
+          markdone: task.status === 'completed' || task.status === 'verified',
+          type: task.type // Include task type to identify HACCP tasks
+        }))
+        setTasks(mappedTasks)
+      } catch (error) {
+        console.error('Error fetching tasks:', error)
+      }
+    }
+    fetchTasks()
+  }, [])
 
   const calculateTimeLeft = (taskDate) => {
     const now = new Date()
@@ -103,13 +120,72 @@ const TaskListTable = () => {
     return `${diffHrs}h ${diffMins}m`
   }
 
-  const handleToggleMarkDone = useCallback((taskId) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.id === taskId ? { ...task, markdone: !task.markdone } : task
+  const handleToggleMarkDone = useCallback(async (taskId) => {
+    const task = tasks.find(t => t.id === taskId)
+    if (task.type === 'haccp' && !task.markdone) {
+      // Open dialog for corrective actions if task is HACCP and being marked as done
+      setSelectedTaskId(taskId)
+      setCorrectiveActionsOpen(true)
+    } else {
+      // Proceed with status update for non-HACCP tasks or when unmarking
+      try {
+        const newStatus = task.markdone ? 'pending' : 'completed'
+        const token = localStorage.getItem('token')
+        await axios.patch(
+          `http://localhost:5001/api/tasks/${taskId}/status`,
+          { status: newStatus },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+        setTasks(prev =>
+          prev.map(t =>
+            t.id === taskId ? { ...t, markdone: !t.markdone } : t
+          )
+        )
+      } catch (error) {
+        console.error('Error updating task status:', error)
+      }
+    }
+  }, [tasks])
+
+  const handleCorrectiveActionsSubmit = useCallback(async () => {
+    if (!correctiveActions.trim()) {
+      alert('Please provide corrective actions.')
+      return
+    }
+    try {
+      const token = localStorage.getItem('token')
+      await axios.patch(
+        `http://localhost:5001/api/tasks/${selectedTaskId}/status`,
+        { status: 'completed', correctiveActions },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
       )
-    )
-  }, [])
+      setTasks(prev =>
+        prev.map(task =>
+          task.id === selectedTaskId ? { ...task, markdone: true } : task
+        )
+      )
+      setCorrectiveActionsOpen(false)
+      setCorrectiveActions('')
+      setSelectedTaskId(null)
+    } catch (error) {
+      console.error('Error updating task status:', error)
+      alert(error.response?.data?.message || 'Failed to update task status')
+    }
+  }, [correctiveActions, selectedTaskId])
+
+  const handleCorrectiveActionsClose = () => {
+    setCorrectiveActionsOpen(false)
+    setCorrectiveActions('')
+    setSelectedTaskId(null)
+  }
 
   const handleDeleteTask = useCallback((taskId) => {
     setTasks(prev => prev.filter(task => task.id !== taskId))
@@ -161,7 +237,7 @@ const TaskListTable = () => {
         )
       },
       columnHelper.accessor('name', {
-        header: 'Name',
+        header: 'Title',
         cell: ({ row }) => (
           <Typography className='font-medium' color='text.primary'>
             {row.original.name}
@@ -202,31 +278,11 @@ const TaskListTable = () => {
           <Typography>{row.original.markdone ? 'Done' : 'Pending'}</Typography>
         )
       }),
-      columnHelper.accessor('actions', {
-        header: 'Actions',
+      columnHelper.accessor('timeleft', {
+        header: 'Priority',
         cell: ({ row }) => (
-          <div className='flex items-center'>
-            <IconButton>
-              <i className='tabler-edit text-textSecondary' />
-            </IconButton>
-            <OptionMenu
-              iconButtonProps={{ size: 'medium' }}
-              iconClassName='text-textSecondary'
-              options={[
-                { text: 'Download', icon: 'tabler-download' },
-                {
-                  text: 'Delete',
-                  icon: 'tabler-trash',
-                  menuItemProps: {
-                    onClick: () => handleDeleteTask(row.original.id)
-                  }
-                },
-                { text: 'Duplicate', icon: 'tabler-copy' }
-              ]}
-            />
-          </div>
-        ),
-        enableSorting: false
+          <Typography>{calculateTimeLeft(row.original.createdAt)}</Typography>
+        )
       })
     ],
     [handleToggleMarkDone, handleDeleteTask]
@@ -268,22 +324,6 @@ const TaskListTable = () => {
             <MenuItem value='25'>25</MenuItem>
             <MenuItem value='50'>50</MenuItem>
           </CustomTextField>
-          <Button
-            color='secondary'
-            variant='tonal'
-            className='max-sm:is-full is-auto'
-            startIcon={<i className='tabler-upload' />}
-          >
-            Export
-          </Button>
-          <Button
-            variant='contained'
-            onClick={handleOpen}
-            className='max-sm:is-full is-auto'
-            startIcon={<i className='tabler-plus' />}
-          >
-            Add Task
-          </Button>
         </div>
       </div>
       <Divider />
@@ -377,6 +417,35 @@ const TaskListTable = () => {
           </Button>
           <Button onClick={handleSubmit} variant='contained' color='primary'>
             Add Task
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Corrective Actions Dialog for HACCP Tasks */}
+      <Dialog open={correctiveActionsOpen} onClose={handleCorrectiveActionsClose} maxWidth='sm' fullWidth>
+        <DialogTitle>
+          <Typography variant='h6'>Provide Corrective Actions</Typography>
+        </DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin='dense'
+            label='Corrective Actions'
+            fullWidth
+            variant='outlined'
+            multiline
+            rows={4}
+            value={correctiveActions}
+            onChange={(e) => setCorrectiveActions(e.target.value)}
+            placeholder='e.g., Adjust thermostat if temperature exceeds 5°C'
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCorrectiveActionsClose} color='secondary'>
+            Cancel
+          </Button>
+          <Button onClick={handleCorrectiveActionsSubmit} variant='contained' color='primary'>
+            Submit
           </Button>
         </DialogActions>
       </Dialog>
