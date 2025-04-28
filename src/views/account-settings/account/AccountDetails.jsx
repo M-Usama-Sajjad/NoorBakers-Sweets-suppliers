@@ -1,7 +1,8 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSelector } from 'react-redux'
 
 // MUI Imports
 import Grid from '@mui/material/Grid2'
@@ -12,33 +13,49 @@ import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
 import Chip from '@mui/material/Chip'
 
+// Third-party Imports
+import axios from 'axios'
+
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
+import Image from 'next/image'
 
 // Vars
-const initialData = {
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@example.com',
-  organization: 'Pixinvent',
-  phoneNumber: '+1 (917) 543-9876',
-  address: '123 Main St, New York, NY 10001',
-  state: 'New York',
-  zipCode: '634880',
-  country: 'usa',
-  language: 'english',
-  timezone: 'gmt-12',
-  currency: 'usd'
-}
-
 const languageData = ['English', 'Arabic', 'French', 'German', 'Portuguese']
 
 const AccountDetails = () => {
   // States
-  const [formData, setFormData] = useState(initialData)
+  const [formData, setFormData] = useState(null)
   const [fileInput, setFileInput] = useState('')
   const [imgSrc, setImgSrc] = useState('/images/avatars/1.png')
   const [language, setLanguage] = useState(['English'])
+  const [profilePicUrl, setProfilePicUrl] = useState(null)
+
+  // Redux: Get user data from store
+  const user = useSelector(state => state.auth.user)
+
+  // Initialize formData with Redux user data
+  useEffect(() => {
+    if (user) {
+      const [city, state, country] = user.address ? user.address.split(', ').map(s => s.trim()) : ['', '', '']
+      setFormData({
+        firstName: user.name ? user.name.split(' ')[0] : '',
+        lastName: user.name ? user.name.split(' ').slice(1).join(' ') : '',
+        email: user.email || '',
+        organization: user.businessName || '',
+        phoneNumber: user.phone || '',
+        address: city || '',
+        state: state || '',
+        zipCode: '',
+        country: country ? country.toLowerCase() : 'usa',
+        language: 'english',
+        timezone: 'gmt-05',
+        currency: 'usd'
+      })
+      // Set initial profile picture if available
+      setImgSrc(user.profilepic || '/images/avatars/1.png')
+    }
+  }, [user])
 
   const handleDelete = value => {
     setLanguage(current => current.filter(item => item !== value))
@@ -52,7 +69,7 @@ const AccountDetails = () => {
     setFormData({ ...formData, [field]: value })
   }
 
-  const handleFileInputChange = file => {
+  const handleFileInputChange = async file => {
     const reader = new FileReader()
     const { files } = file.target
 
@@ -63,19 +80,77 @@ const AccountDetails = () => {
       if (reader.result !== null) {
         setFileInput(reader.result)
       }
+
+      // Upload image to API
+      try {
+        const formData = new FormData()
+        formData.append('image', files[0])
+        const token = localStorage.getItem('token')
+        const response = await axios.post('http://localhost:5001/api/upload/upload', formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data'
+          }
+        })
+
+        if (response.data.fileName) {
+          setProfilePicUrl(process.env.NEXT_PUBLIC_FILE_PATH + response.data.fileName)
+        } else {
+          console.error('Image upload failed:', response.data.message)
+        }
+      } catch (error) {
+        console.error('Error uploading image:', error.response?.data?.message || error.message)
+      }
     }
   }
 
   const handleFileInputReset = () => {
     setFileInput('')
-    setImgSrc('/images/avatars/1.png')
+    setImgSrc(user?.profilepic || '/images/avatars/1.png')
+    setProfilePicUrl(null)
+  }
+
+  const handleSubmit = async e => {
+    e.preventDefault()
+    if (!user || !formData) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const updatedData = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        businessName: formData.organization,
+        phone: formData.phoneNumber,
+        address: `${formData.address}, ${formData.state}, ${formData.country}`,
+        profilepic: profilePicUrl || user.profilepic || null
+      }
+
+      const response = await axios.patch(`http://localhost:5001/api/users/${user._id}`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.success) {
+        console.log('User updated successfully:', response.data)
+        // Optionally dispatch an action to update Redux store with new user data
+      } else {
+        console.error('User update failed:', response.data.message)
+      }
+    } catch (error) {
+      console.error('Error updating user:', error.response?.data?.message || error.message)
+    }
+  }
+
+  if (!formData) {
+    return <Typography>Loading...</Typography>
   }
 
   return (
     <Card>
       <CardContent className='mbe-4'>
         <div className='flex max-sm:flex-col items-center gap-6'>
-          <img height={100} width={100} className='rounded' src={imgSrc} alt='Profile' />
+          <Image height={100} width={100} className='rounded' src={imgSrc} alt='Profile' key={imgSrc} />
           <div className='flex flex-grow flex-col gap-4'>
             <div className='flex flex-col sm:flex-row gap-4'>
               <Button component='label' variant='contained' htmlFor='account-settings-upload-image'>
@@ -98,7 +173,7 @@ const AccountDetails = () => {
         </div>
       </CardContent>
       <CardContent>
-        <form onSubmit={e => e.preventDefault()}>
+        <form onSubmit={handleSubmit}>
           <Grid container spacing={6}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
@@ -130,7 +205,7 @@ const AccountDetails = () => {
             <Grid size={{ xs: 12, sm: 6 }}>
               <CustomTextField
                 fullWidth
-                label='Organization'
+                label='Bussiness Name'
                 value={formData.organization}
                 placeholder='Pixinvent'
                 onChange={e => handleFormChange('organization', e.target.value)}
@@ -154,122 +229,37 @@ const AccountDetails = () => {
                 onChange={e => handleFormChange('address', e.target.value)}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                fullWidth
-                label='State'
-                value={formData.state}
-                placeholder='New York'
-                onChange={e => handleFormChange('state', e.target.value)}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                fullWidth
-                type='number'
-                label='Zip Code'
-                value={formData.zipCode}
-                placeholder='123456'
-                onChange={e => handleFormChange('zipCode', e.target.value)}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                select
-                fullWidth
-                label='Country'
-                value={formData.country}
-                onChange={e => handleFormChange('country', e.target.value)}
-              >
-                <MenuItem value='usa'>USA</MenuItem>
-                <MenuItem value='uk'>UK</MenuItem>
-                <MenuItem value='australia'>Australia</MenuItem>
-                <MenuItem value='germany'>Germany</MenuItem>
-              </CustomTextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                select
-                fullWidth
-                label='Language'
-                value={language}
-                slotProps={{
-                  select: {
-                    multiple: true, // @ts-ignore
-                    onChange: handleChange,
-                    renderValue: selected => (
-                      <div className='flex flex-wrap gap-2'>
-                        {selected.map(value => (
-                          <Chip
-                            key={value}
-                            clickable
-                            onMouseDown={event => event.stopPropagation()}
-                            size='small'
-                            label={value}
-                            onDelete={() => handleDelete(value)}
-                          />
-                        ))}
-                      </div>
-                    )
-                  }
-                }}
-              >
-                {languageData.map(name => (
-                  <MenuItem key={name} value={name}>
-                    {name}
-                  </MenuItem>
-                ))}
-              </CustomTextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                select
-                fullWidth
-                label='TimeZone'
-                value={formData.timezone}
-                onChange={e => handleFormChange('timezone', e.target.value)}
-                slotProps={{
-                  select: { MenuProps: { PaperProps: { style: { maxHeight: 250 } } } }
-                }}
-              >
-                <MenuItem value='gmt-12'>(GMT-12:00) International Date Line West</MenuItem>
-                <MenuItem value='gmt-11'>(GMT-11:00) Midway Island, Samoa</MenuItem>
-                <MenuItem value='gmt-10'>(GMT-10:00) Hawaii</MenuItem>
-                <MenuItem value='gmt-09'>(GMT-09:00) Alaska</MenuItem>
-                <MenuItem value='gmt-08'>(GMT-08:00) Pacific Time (US & Canada)</MenuItem>
-                <MenuItem value='gmt-08-baja'>(GMT-08:00) Tijuana, Baja California</MenuItem>
-                <MenuItem value='gmt-07'>(GMT-07:00) Chihuahua, La Paz, Mazatlan</MenuItem>
-                <MenuItem value='gmt-07-mt'>(GMT-07:00) Mountain Time (US & Canada)</MenuItem>
-                <MenuItem value='gmt-06'>(GMT-06:00) Central America</MenuItem>
-                <MenuItem value='gmt-06-ct'>(GMT-06:00) Central Time (US & Canada)</MenuItem>
-                <MenuItem value='gmt-06-mc'>(GMT-06:00) Guadalajara, Mexico City, Monterrey</MenuItem>
-                <MenuItem value='gmt-06-sk'>(GMT-06:00) Saskatchewan</MenuItem>
-                <MenuItem value='gmt-05'>(GMT-05:00) Bogota, Lima, Quito, Rio Branco</MenuItem>
-                <MenuItem value='gmt-05-et'>(GMT-05:00) Eastern Time (US & Canada)</MenuItem>
-                <MenuItem value='gmt-05-ind'>(GMT-05:00) Indiana (East)</MenuItem>
-                <MenuItem value='gmt-04'>(GMT-04:00) Atlantic Time (Canada)</MenuItem>
-                <MenuItem value='gmt-04-clp'>(GMT-04:00) Caracas, La Paz</MenuItem>
-              </CustomTextField>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <CustomTextField
-                select
-                fullWidth
-                label='Currency'
-                value={formData.currency}
-                onChange={e => handleFormChange('currency', e.target.value)}
-              >
-                <MenuItem value='usd'>USD</MenuItem>
-                <MenuItem value='euro'>EUR</MenuItem>
-                <MenuItem value='pound'>Pound</MenuItem>
-                <MenuItem value='bitcoin'>Bitcoin</MenuItem>
-              </CustomTextField>
-            </Grid>
+           
+            
+           
+            
             <Grid size={{ xs: 12 }} className='flex gap-4 flex-wrap'>
               <Button variant='contained' type='submit'>
                 Save Changes
               </Button>
-              <Button variant='tonal' type='reset' color='secondary' onClick={() => setFormData(initialData)}>
+              <Button
+                variant='tonal'
+                type='reset'
+                color='secondary'
+                onClick={() => {
+                  setFormData({
+                    firstName: user?.name ? user.name.split(' ')[0] : '',
+                    lastName: user?.name ? user.name.split(' ').slice(1).join(' ') : '',
+                    email: user?.email || '',
+                    organization: user?.businessName || '',
+                    phoneNumber: user?.phone || '',
+                    address: user?.address ? user.address.split(', ')[0] : '',
+                    state: user?.address ? user.address.split(', ')[1] : '',
+                    zipCode: '',
+                    country: user?.address ? user.address.split(', ')[2]?.toLowerCase() : 'usa',
+                    language: 'english',
+                    timezone: 'gmt-05',
+                    currency: 'usd'
+                  })
+                  setLanguage(['English'])
+                  handleFileInputReset()
+                }}
+              >
                 Reset
               </Button>
             </Grid>

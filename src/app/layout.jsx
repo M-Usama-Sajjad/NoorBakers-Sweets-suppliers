@@ -4,6 +4,10 @@ import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
 // Third-party Imports
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
+// Redux Imports
+import ReduxProvider from '@/utils/ReduxProvider' // Adjust the path to your ReduxProvider file
+import store from '@/libs/redux/index' // Adjust the path to your store file
+
 // Util Imports
 import { getSystemMode } from '@core/utils/serverHelpers'
 
@@ -12,6 +16,7 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+import AuthProvider from '@/utils/AuthProvider'
 
 export const metadata = {
   title: 'Vuexy - MUI Next.js Admin Dashboard Template',
@@ -30,7 +35,11 @@ const RootLayout = async props => {
     <html id='__next' lang='en' dir={direction} suppressHydrationWarning>
       <body className='flex is-full min-bs-full flex-auto flex-col'>
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-        {children}
+        <ReduxProvider>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ReduxProvider>
       </body>
     </html>
   )

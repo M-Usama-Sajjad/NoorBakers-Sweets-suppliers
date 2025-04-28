@@ -1,12 +1,15 @@
+'use client'
+
+// React Imports
+import { useSelector } from 'react-redux'
+
 // Next Imports
 import dynamic from 'next/dynamic'
 
 // Component Imports
 import UserProfile from '@views/user-profile'
 
-// Data Imports
-import { getProfileData } from '@/app/server/actions'
-
+// Dynamic Component Imports
 const ProfileTab = dynamic(() => import('@views/user-profile/profile'))
 const TeamsTab = dynamic(() => import('@views/user-profile/teams'))
 const ProjectsTab = dynamic(() => import('@views/user-profile/projects'))
@@ -14,33 +17,34 @@ const ConnectionsTab = dynamic(() => import('@views/user-profile/connections'))
 
 // Vars
 const tabContentList = data => ({
-  profile: <ProfileTab data={data?.users.profile} />,
-  // teams: <TeamsTab data={data?.users.teams} />,
-  // projects: <ProjectsTab data={data?.users.projects} />,
-  // connections: <ConnectionsTab data={data?.users.connections} />
+  profile: <ProfileTab data={data?.profile} />,
+  // teams: <TeamsTab data={data?.teams} />,
+  // projects: <ProjectsTab data={data?.projects} />,
+  // connections: <ConnectionsTab data={data?.connections} />
 })
 
-/**
- * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
- * ! `.env` file found at root of your project and also update the API endpoints like `/pages/profile` in below example.
- * ! Also, remove the above server action import and the action itself from the `src/app/server/actions.ts` file to clean up unused code
- * ! because we've used the server action for getting our static data.
- */
-/* const getProfileData = async () => {
-  // Vars
-  const res = await fetch(`${process.env.API_URL}/pages/profile`)
+const ProfilePage = () => {
+  // Retrieve user data from Redux store
+  const user = useSelector(state => state?.auth?.user)
 
-  if (!res.ok) {
-    throw new Error('Failed to fetch profileData')
+  // Map Redux user data to the format expected by ProfileTab
+  const profileData = {
+    profile: {
+      about: [
+        { property: 'Full Name', value: user?.name || 'N/A', icon: 'tabler-user' },
+        { property: 'Status', value: user?.isActive ? 'active' : 'inactive', icon: 'tabler-check' },
+        { property: 'Role', value: user?.role || 'N/A', icon: 'tabler-crown' },
+        { property: 'Business Name', value: user?.businessName || 'N/A', icon: 'tabler-building-store' }
+      ],
+      contacts: [
+        { property: 'Contact', value: user?.phone || 'N/A', icon: 'tabler-phone-call' },
+        { property: 'Email', value: user?.email || 'N/A', icon: 'tabler-mail' }
+      ],
+
+    }
   }
 
-  return res.json()
-} */
-const ProfilePage = async () => {
-  // Vars
-  const data = await getProfileData()
-
-  return <UserProfile data={data} tabContentList={tabContentList(data)} />
+  return <UserProfile data={profileData} tabContentList={tabContentList(profileData)} />
 }
 
 export default ProfilePage

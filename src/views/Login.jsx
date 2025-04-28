@@ -19,7 +19,11 @@ import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import classnames from 'classnames'
-import axios from 'axios' // Import Axios
+import axios from 'axios'
+
+// Redux Imports
+import { useDispatch } from 'react-redux' // Import useDispatch
+import { login } from '@/libs/redux/actions/authActions' // Adjust the path to your action creators
 
 // Component Imports
 import Link from '@components/Link'
@@ -78,6 +82,7 @@ const LoginV2 = ({ mode }) => {
   const theme = useTheme()
   const hidden = useMediaQuery(theme.breakpoints.down('md'))
   const authBackground = useImageVariant(mode, lightImg, darkImg)
+  const dispatch = useDispatch() // Initialize useDispatch
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault()
@@ -90,10 +95,14 @@ const LoginV2 = ({ mode }) => {
         password
       })
 
-      // Check for status 200 and successful response
-      if (response.status === 200 || response.status ==201 && response.data.success) {
+      // Check for status 200 or 201 and successful response
+      if ((response.status === 200 || response.status === 201) && response.data.success) {
         // Store token in localStorage
         localStorage.setItem('token', response.data.token)
+
+        // Dispatch login action to Redux store
+        dispatch(login(response.data.token, response.data.user))
+
         // Redirect to home page
         router.push('/home', undefined, { locale: false })
       } else {
