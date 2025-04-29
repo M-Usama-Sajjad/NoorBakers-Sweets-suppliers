@@ -1,3 +1,4 @@
+// ProductImage.jsx
 'use client'
 
 // React Imports
@@ -16,6 +17,7 @@ import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import { useDropzone } from 'react-dropzone'
+import axios from 'axios'
 
 // Component Imports
 import Link from '@components/Link'
@@ -38,20 +40,54 @@ const Dropzone = styled(AppReactDropzone)(({ theme }) => ({
   }
 }))
 
-const ProductImage = () => {
+const ProductImage = ({ onImageUpload }) => {
   // States
   const [files, setFiles] = useState([])
+  const [imgSrc, setImgSrc] = useState(null)
+  const [profilePicUrl, setProfilePicUrl] = useState(null)
 
   // Hooks
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: acceptedFiles => {
       setFiles(acceptedFiles.map(file => Object.assign(file)))
+      handleFileUpload(acceptedFiles[0])
     }
   })
 
+  const handleFileUpload = async (file) => {
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = () => setImgSrc(reader.result)
+    reader.readAsDataURL(file)
+
+    // Upload image to API
+    try {
+      const formData = new FormData()
+      formData.append('image', file)
+      const token = localStorage.getItem('token')
+      const response = await axios.post('http://localhost:5001/api/upload/upload', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+
+      if (response.data.fileName) {
+        const imageUrl = process.env.NEXT_PUBLIC_FILE_PATH + response.data.fileName
+        setProfilePicUrl(imageUrl)
+        onImageUpload(imageUrl) // Pass the uploaded image URL to parent
+      } else {
+        console.error('Image upload failed:', response.data.message)
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error.response?.data?.message || error.message)
+    }
+  }
+
   const renderFilePreview = file => {
     if (file.type.startsWith('image')) {
-      return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file)} />
+      return <img width={38} height={38} alt={file.name} src={imgSrc || URL.createObjectURL(file)} />
     } else {
       return <i className='tabler-file-description' />
     }
@@ -60,8 +96,17 @@ const ProductImage = () => {
   const handleRemoveFile = file => {
     const uploadedFiles = files
     const filtered = uploadedFiles.filter(i => i.name !== file.name)
-
     setFiles([...filtered])
+    setImgSrc(null)
+    setProfilePicUrl(null)
+    onImageUpload(null) // Reset image URL in parent
+  }
+
+  const handleRemoveAllFiles = () => {
+    setFiles([])
+    setImgSrc(null)
+    setProfilePicUrl(null)
+    onImageUpload(null) // Reset image URL in parent
   }
 
   const fileList = files.map(file => (
@@ -84,10 +129,6 @@ const ProductImage = () => {
       </IconButton>
     </ListItem>
   ))
-
-  const handleRemoveAllFiles = () => {
-    setFiles([])
-  }
 
   return (
     <Dropzone>

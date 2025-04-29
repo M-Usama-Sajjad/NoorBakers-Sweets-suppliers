@@ -22,6 +22,9 @@ import Button from '@mui/material/Button'
 
 // Hook Imports
 import { useSettings } from '@core/hooks/useSettings'
+import { useSelector } from 'react-redux'
+import Image from 'next/image'
+
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -64,6 +67,8 @@ const UserDropdown = () => {
     localStorage.removeItem('token')
     router.push('/login')
   }
+   const user= useSelector((state) => state.auth.user)
+   console.log(user?.name)
 
   return (
     <>
@@ -74,12 +79,15 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         className='mis-2'
       >
-        <Avatar
+        <Image
+          width={38}
+          height={38}
+          variant='rounded'
           ref={anchorRef}
           alt='John Doe'
-          src='/images/avatars/1.png'
+          src={user?.profilepic || null}
           onClick={handleDropdownOpen}
-          className='cursor-pointer bs-[38px] is-[38px]'
+          className='cursor-pointer bs-[38px] is-[38px]  rounded-full'
         />
       </Badge>
       <Popper
@@ -101,12 +109,13 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
-                    <Avatar alt='John Doe' src='/images/avatars/1.png' />
+                    <Image alt='John Doe' src={user?.profilepic || null}   width={38} className='rounded-full'
+          height={38} />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
-                        John Doe
+                        {user?.name}
                       </Typography>
-                      <Typography variant='caption'>admin@vuexy.com</Typography>
+                      <Typography variant='caption'>{user?.email}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />

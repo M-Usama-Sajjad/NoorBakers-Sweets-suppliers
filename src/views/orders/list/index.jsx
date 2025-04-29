@@ -82,7 +82,7 @@ const OrderList = () => {
     <>
       <Grid container spacing={6}>
         <Grid size={{ xs: 12 }}>
-          <OrderCard />
+          <OrderCard orderData={orderData} />
         </Grid>
         <Grid size={{ xs: 12 }}>
           <OrderListTable orderData={orderData} />

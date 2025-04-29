@@ -107,7 +107,9 @@ const EditProduct = () => {
             location: product.location || 'supplier',
             batchNumber: product.batchNumber || 'BATCH001',
             isActive: product.isActive !== undefined ? product.isActive : true,
-            sku: product.sku || ''
+            sku: product.sku || '',
+            productImage: productData.productImage || undefined
+
           }
           console.log('New productData:', newProductData)
           setProductData(newProductData)
@@ -158,7 +160,9 @@ const EditProduct = () => {
         expiryDate: productData.expiryDate || undefined,
         status: productData.status,
         isActive: productData.isActive,
-        sku: productData.sku || undefined
+        sku: productData.sku || undefined,
+        productImage: productData.productImage || undefined
+
       }
 
       const response = await axios.patch(`http://localhost:5001/api/products/${id}`, payload, {
@@ -180,6 +184,9 @@ const EditProduct = () => {
   // Handle snackbar close
   const handleClose = () => {
     setOpen(false)
+  }
+  const handleImageUpload = (imageUrl) => {
+    setProductData(prev => ({ ...prev, productImage: imageUrl }))
   }
 
   // Mock product data for RawProductToggleTable
@@ -203,7 +210,7 @@ const EditProduct = () => {
               <ProductInformation productData={productData} onChange={handleChange} />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <ProductImage />
+              <ProductImage onImageUpload={handleImageUpload}/>
             </Grid>
             <Grid size={{ xs: 12 }}>
               <RawProductToggleTable productData={data?.products} />

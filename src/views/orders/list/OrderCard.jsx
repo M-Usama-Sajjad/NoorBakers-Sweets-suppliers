@@ -1,3 +1,5 @@
+'use client'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -12,34 +14,51 @@ import classnames from 'classnames'
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
 
-// Vars
-const data = [
-  {
-    value: 56,
-    title: 'Pending Payment',
-    icon: 'tabler-calendar-stats'
-  },
-  {
-    value: 12689,
-    title: 'Completed',
-    icon: 'tabler-checks'
-  },
-  {
-    value: 124,
-    title: 'Refunded',
-    icon: 'tabler-wallet'
-  },
-  {
-    value: 32,
-    title: 'Failed',
-    icon: 'tabler-alert-octagon'
-  }
-]
+const OrderCard = ({ orderData }) => {
+  console.log(orderData)
 
-const OrderCard = () => {
   // Hooks
   const isBelowMdScreen = useMediaQuery(theme => theme.breakpoints.down('md'))
   const isBelowSmScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+
+  // Calculate status counts from orderData
+  const statusCounts = {
+    Returned: 0,
+    Processing: 0,
+    Delivered: 0,
+    Cancelled: 0
+  };
+
+  // Count occurrences of each status
+  orderData?.forEach(order => {
+    if (order.status in statusCounts) {
+      statusCounts[order.status]++;
+    }
+  });
+
+  // Create data array for rendering
+  const data = [
+    {
+      value: statusCounts.Returned,
+      title: 'Returned',
+      icon: 'tabler-wallet'
+    },
+    {
+      value: statusCounts.Processing,
+      title: 'Processing',
+      icon: 'tabler-calendar-stats'
+    },
+    {
+      value: statusCounts.Delivered,
+      title: 'Delivered',
+      icon: 'tabler-checks'
+    },
+    {
+      value: statusCounts.Cancelled,
+      title: 'Cancelled',
+      icon: 'tabler-alert-octagon'
+    }
+  ];
 
   return (
     <Card>

@@ -1,3 +1,5 @@
+'use client'
+
 // React Imports
 import { useState, useEffect, useMemo } from 'react'
 
@@ -14,6 +16,8 @@ import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
 import TablePagination from '@mui/material/TablePagination'
 import MenuItem from '@mui/material/MenuItem'
+import Tabs from '@mui/material/Tabs'
+import Tab from '@mui/material/Tab'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -97,6 +101,7 @@ const OrderListTable = ({ orderData }) => {
   const [rowSelection, setRowSelection] = useState({})
   const [data, setData] = useState(orderData)
   const [globalFilter, setGlobalFilter] = useState('')
+  const [activeTab, setActiveTab] = useState('all')
 
   // Hooks
   const { lang: locale } = useParams()
@@ -105,6 +110,14 @@ const OrderListTable = ({ orderData }) => {
   useEffect(() => {
     setData(orderData)
   }, [orderData])
+
+  // Filter data based on active tab
+  const filteredData = useMemo(() => {
+    if (activeTab === 'all') {
+      return data?.filter(order => order.status !== 'Returned') || []
+    }
+    return data?.filter(order => order.status === 'Returned') || []
+  }, [data, activeTab])
 
   // Vars
   const paypal = '/images/apps/ecommerce/paypal.png'
@@ -169,22 +182,6 @@ const OrderListTable = ({ orderData }) => {
           </div>
         )
       }),
-      // columnHelper.accessor('payment', {
-      //   header: 'Payment',
-      //   cell: ({ row }) => (
-      //     <div className='flex items-center gap-1'>
-      //       <i
-      //         className={classnames(
-      //           'tabler-circle-filled bs-2.5 is-2.5',
-      //           paymentStatus[row.original.payment].colorClassName
-      //         )}
-      //       />
-      //       <Typography color={`${paymentStatus[row.original.payment].color}.main`} className='font-medium'>
-      //         {paymentStatus[row.original.payment].text}
-      //       </Typography>
-      //     </div>
-      //   )
-      // }),
       columnHelper.accessor('status', {
         header: 'Status',
         cell: ({ row }) => (
@@ -196,27 +193,10 @@ const OrderListTable = ({ orderData }) => {
           />
         )
       }),
-      // columnHelper.accessor('method', {
-      //   header: 'Method',
-      //   cell: ({ row }) => (
-      //     <div className='flex items-center'>
-      //       <div className='flex justify-center items-center bg-[#F6F8FA] rounded-sm is-[29px] bs-[18px]'>
-      //         <img
-      //           src={row.original.method === 'mastercard' ? mastercard : paypal}
-      //           height={row.original.method === 'mastercard' ? 11 : 14}
-      //         />
-      //       </div>
-      //       <Typography>
-      //         {`...${row.original.method === 'mastercard' ? row.original.methodNumber : '@gmail.com'}`}
-      //       </Typography>
-      //     </div>
-      //   )
-      // }),
       columnHelper.accessor('action', {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            {/* {console.log('Row data:', row.original)} */}
             <OptionMenu
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary'
@@ -247,7 +227,7 @@ const OrderListTable = ({ orderData }) => {
   )
 
   const table = useReactTable({
-    data: data,
+    data: filteredData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -290,33 +270,36 @@ const OrderListTable = ({ orderData }) => {
 
   return (
     <Card>
-      <CardContent className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
-        <DebouncedInput
-          value={globalFilter ?? ''}
-          onChange={value => setGlobalFilter(String(value))}
-          placeholder='Search Order'
-          className='sm:is-auto'
-        />
-        <div className='flex items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
-          <CustomTextField
-            select
-            value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
-            className='is-[70px] max-sm:is-full'
-          >
-            <MenuItem value='10'>10</MenuItem>
-            <MenuItem value='25'>25</MenuItem>
-            <MenuItem value='50'>50</MenuItem>
-            <MenuItem value='100'>100</MenuItem>
-          </CustomTextField>
-          <Button
-            variant='tonal'
-            color='secondary'
-            startIcon={<i className='tabler-upload' />}
-            className='max-sm:is-full is-auto'
-          >
-            Export
-          </Button>
+      <CardContent>
+        <Tabs
+          value={activeTab}
+          onChange={(e, newValue) => setActiveTab(newValue)}
+          className='mbe-4'
+        >
+          <Tab value='all' label='All Orders' />
+          <Tab value='returns' label='Returns' />
+        </Tabs>
+        <div className='flex justify-between max-sm:flex-col sm:items-center gap-4'>
+          <DebouncedInput
+            value={globalFilter ?? ''}
+            onChange={value => setGlobalFilter(String(value))}
+            placeholder='Search Order'
+            className='sm:is-auto'
+          />
+          <div className='flex items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
+            <CustomTextField
+              select
+              value={table.getState().pagination.pageSize}
+              onChange={e => table.setPageSize(Number(e.target.value))}
+              className='is-[70px] max-sm:is-full'
+            >
+              <MenuItem value='10'>10</MenuItem>
+              <MenuItem value='25'>25</MenuItem>
+              <MenuItem value='50'>50</MenuItem>
+              <MenuItem value='100'>100</MenuItem>
+            </CustomTextField>
+            
+          </div>
         </div>
       </CardContent>
       <div className='overflow-x-auto'>

@@ -21,7 +21,6 @@ import ProductInventory from '@views/products/add/ProductInventory'
 import ProductPricing from '@views/products/add/ProductPricing'
 import ProductOrganize from '@views/products/add/ProductOrganize'
 import RawProductToggleTable from '@views/products/add/RawProductToggleTable'
-import { skeletonClasses } from '@mui/material'
 import SkinDefault from '@/@core/svg/SkinDefault'
 
 const eCommerceProductsAdd = () => {
@@ -45,9 +44,10 @@ const eCommerceProductsAdd = () => {
     expiryDays: 30,
     location: 'supplier',
     batchNumber: 'BATCH001',
-    isActive: true
+    isActive: true,
+    productImage: null
   })
-
+ console.log(productData.status)
   // State for snackbar
   const [open, setOpen] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -58,12 +58,24 @@ const eCommerceProductsAdd = () => {
     setProductData(prev => ({ ...prev, [field]: value }))
   }
 
+  // Handle image upload
+  const handleImageUpload = (imageUrl) => {
+    setProductData(prev => ({ ...prev, productImage: imageUrl }))
+  }
+
   // Handle form submission
   const handleSubmit = async () => {
     try {
+      // Validate required fields
+      if (!productData.name || !productData.category || !productData.subCategory) {
+        setSuccess(false)
+        setMessage('Please fill in all required fields (Name, Category, Subcategory)')
+        setOpen(true)
+        return
+      }
+
       // Retrieve token from localStorage
       const token = localStorage.getItem('token')
-
       if (!token) {
         setSuccess(false)
         setMessage('No authentication token found. Please log in.')
@@ -74,8 +86,8 @@ const eCommerceProductsAdd = () => {
       const payload = {
         name: productData.name,
         description: productData.description,
-        type: productData.category, // Maps to schema's type (Raw or Ready)
-        category: productData.subCategory, // Maps to schema's category (e.g., Pastries)
+        type: productData.category,
+        category: productData.subCategory,
         materialType: productData.category === 'Raw' ? productData.materialType : undefined,
         supplier: productData.supplier,
         unit: productData.unit,
@@ -86,12 +98,15 @@ const eCommerceProductsAdd = () => {
         quantity: Number(productData.quantity) || 0,
         location: productData.location,
         batchNumber: productData.batchNumber,
-        manufacturingDate: productData.manufacturingDate,
-        expiryDate: productData.expiryDate,
-        status: productData.status ,
+        manufacturingDate: productData.manufacturingDate || undefined,
+        expiryDate: productData.expiryDate || undefined,
+        status: productData.status || undefined,
         isActive: productData.isActive,
         sku: productData.sku || undefined,
+        productImage: productData.productImage || undefined
       }
+
+      console.log('Submitting payload:', payload) // For debugging
 
       const response = await axios.post('http://localhost:5001/api/products/', payload, {
         headers: {
@@ -103,6 +118,7 @@ const eCommerceProductsAdd = () => {
       setMessage('Product added successfully!')
       setOpen(true)
     } catch (error) {
+      console.error('Submission error:', error)
       setSuccess(false)
       setMessage(error.response?.data?.message || 'Failed to add product')
       setOpen(true)
@@ -129,24 +145,15 @@ const eCommerceProductsAdd = () => {
               <ProductInformation productData={productData} onChange={handleChange} />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <ProductImage />
+              <ProductImage onImageUpload={handleImageUpload} />
             </Grid>
             <Grid size={{ xs: 12 }}>
               <RawProductToggleTable productData={data?.products} />
             </Grid>
-            {/* <Grid size={{ xs: 12 }}>
-              <ProductVariants />
-            </Grid> */}
-            {/* <Grid size={{ xs: 12 }}>
-              <ProductInventory />
-            </Grid> */}
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <Grid container spacing={6}>
-            {/* <Grid size={{ xs: 12 }}>
-              <ProductPricing />
-            </Grid> */}
             <Grid size={{ xs: 12 }}>
               <ProductOrganize productData={productData} onChange={handleChange} />
             </Grid>

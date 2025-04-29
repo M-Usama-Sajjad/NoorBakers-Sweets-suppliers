@@ -57,8 +57,8 @@ const ProductOrganize = ({ productData, onChange }) => {
             value={productData.status}
             onChange={e => onChange('status', e.target.value)}
           >
-            <MenuItem value='Published'>Active</MenuItem>
-            <MenuItem value='Inactive'>Inactive</MenuItem>
+            <MenuItem value='active'>Active</MenuItem>
+            <MenuItem value='inactive'>Inactive</MenuItem>
           </CustomTextField>
           <CustomTextField
             fullWidth

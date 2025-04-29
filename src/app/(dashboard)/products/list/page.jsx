@@ -45,7 +45,7 @@ const eCommerceProductsList = () => {
           sku: product.sku || 'N/A',
           qty: product.quantity,
           status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
-          image: product.image || '/images/placeholder.png', // Placeholder if no image
+          image: product.productImage || '/images/placeholder.png', // Placeholder if no image
           productBrand: product.productBrand || 'Unknown' // Placeholder
         }))
 
