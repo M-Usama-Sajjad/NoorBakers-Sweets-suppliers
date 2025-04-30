@@ -67,8 +67,8 @@ const UserDropdown = () => {
     localStorage.removeItem('token')
     router.push('/login')
   }
-   const user= useSelector((state) => state.auth.user)
-   console.log(user?.name)
+  const user = useSelector((state) => state.auth.user)
+  console.log(user?.name)
 
   return (
     <>
@@ -109,8 +109,8 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
-                    <Image alt='John Doe' src={user?.profilepic || null}   width={38} className='rounded-full'
-          height={38} />
+                    <Image alt='John Doe' src={user?.profilepic || null} width={38} className='rounded-full'
+                      height={38} />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
                         {user?.name}

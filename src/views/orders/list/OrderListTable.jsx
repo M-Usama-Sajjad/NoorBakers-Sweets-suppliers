@@ -258,7 +258,7 @@ const OrderListTable = ({ orderData }) => {
     const { avatar, customer } = params
 
     if (avatar) {
-      return <CustomAvatar src={avatar} skin='light' size={34} />
+      return <CustomAvatar src={avatar || null} skin='light' size={34} />
     } else {
       return (
         <CustomAvatar skin='light' size={34}>

@@ -38,7 +38,7 @@ const OrderDetailHeader = ({ orderData, order }) => {
   const getStatusColor = (status) => {
     return statusChipColor[status]?.color || 'default' // Fallback to 'default'
   }
-
+    console.log('OrderDetailHeader orderData:', orderData.status)
   return (
     <div className='flex flex-wrap justify-between sm:items-center max-sm:flex-col gap-y-4'>
       <div className='flex flex-col items-start gap-1'>
@@ -50,21 +50,21 @@ const OrderDetailHeader = ({ orderData, order }) => {
             color={getStatusColor(orderData?.status)}
             size='small'
           />
-          <Chip
+          {/* <Chip
             variant='tonal'
             label={paymentStatus[orderData?.payment ?? 2].text}
             color={paymentStatus[orderData?.payment ?? 2].color}
             size='small'
-          />
+          /> */}
         </div>
         <Typography>{`${new Date(orderData?.date ?? '').toDateString()}, ${orderData?.time} (ET)`}</Typography>
       </div>
-      <OpenDialogOnElementClick
+      {/* <OpenDialogOnElementClick
         element={Button}
         elementProps={buttonProps('Delete Order', 'error', 'tonal')}
         dialog={ConfirmationDialog}
         dialogProps={{ type: 'delete-order' }}
-      />
+      /> */}
     </div>
   )
 }

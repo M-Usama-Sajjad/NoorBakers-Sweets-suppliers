@@ -17,7 +17,7 @@ console.log(user)
       <CardMedia image={user?.coverImg} className='bs-[250px]' />
       <CardContent className='flex gap-5 justify-center flex-col items-center md:items-end md:flex-row !pt-0 md:justify-start'>
         <div className='flex rounded-bs-md mbs-[-40px] border-[5px] mis-[-5px] border-be-0  border-backgroundPaper bg-backgroundPaper'>
-          <Image height={120} width={120} src={user?.profilepic} className='rounded' alt='Profile Background' />
+          <Image height={120} width={120} src={user?.profilepic || null} className='rounded' alt='Profile Background' />
         </div>
         <div className='flex is-full justify-start self-end flex-col items-center gap-6 sm-gap-0 sm:flex-row sm:justify-between sm:items-end '>
           <div className='flex flex-col items-center sm:items-start gap-2'>

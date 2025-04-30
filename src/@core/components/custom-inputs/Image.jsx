@@ -58,7 +58,7 @@ const CustomCheckboxImg = props => {
     return (
       <Grid {...gridProps}>
         <Root className={classnames({ active: selected.includes(value) })} onClick={() => handleChange(value)}>
-          {typeof img === 'string' ? <Image src={img} alt={alt ?? `checkbox-image-${value}`} /> : img}
+          {typeof img === 'string'  ? <Image src={img || null} alt={alt ?? `checkbox-image-${value}`} /> : img}
           {type === 'radio' ? null : (
             <CheckboxInput
               color={color}

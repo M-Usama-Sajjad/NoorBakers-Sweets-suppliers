@@ -103,5 +103,5 @@ export default function OrderDetailsPage() {
 
   // console.log('orderData in main page:', orderData);
 
-  return <OrderDetails orderData={orderData} order={orderData.order} />;
+  return <OrderDetails orderData={orderData} order={orderData.order} setOrderData={setOrderData} />;
 }

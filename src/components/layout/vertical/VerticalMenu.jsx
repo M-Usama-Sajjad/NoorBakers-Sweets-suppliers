@@ -76,13 +76,13 @@ const VerticalMenu = ({ scrollMenu, dictionary }) => {
 
         <SubMenu label={dictionary['navigation'].orders } icon={<i className='tabler-shopping-cart' />}>
               <MenuItem href={`/orders/list`}>{dictionary['navigation'].list}</MenuItem>
-              <MenuItem
+              {/* <MenuItem
                 href={`/orders/details/5434`}
                 exactMatch={false}
                 activeUrl='orders/details'
               >
                 {dictionary['navigation'].details}
-              </MenuItem>
+              </MenuItem> */}
             </SubMenu>
 
             <MenuItem href='/tasks' icon={<i className='tabler-smart-home' />}>
