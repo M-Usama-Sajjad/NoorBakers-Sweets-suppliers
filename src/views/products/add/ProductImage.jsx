@@ -25,6 +25,7 @@ import CustomAvatar from '@core/components/mui/Avatar'
 
 // Styled Component Imports
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
+import Image from 'next/image'
 
 // Styled Dropzone Component
 const Dropzone = styled(AppReactDropzone)(({ theme }) => ({
@@ -87,7 +88,7 @@ const ProductImage = ({ onImageUpload }) => {
 
   const renderFilePreview = file => {
     if (file.type.startsWith('image')) {
-      return <img width={38} height={38} alt={file.name} src={imgSrc || URL.createObjectURL(file)} />
+      return <Image width={38} height={38} alt={file.name} src={imgSrc || URL.createObjectURL(file)} />
     } else {
       return <i className='tabler-file-description' />
     }

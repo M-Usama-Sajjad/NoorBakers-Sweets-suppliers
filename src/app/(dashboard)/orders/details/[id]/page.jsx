@@ -11,6 +11,7 @@ import axios from 'axios';
 
 // Component Imports
 import OrderDetails from '@views/orders/details';
+import Loader from '@/components/Loader';
 
 // Map backend paymentStatus to paymentStatus keys
 const paymentStatusMap = {
@@ -97,7 +98,7 @@ export default function OrderDetailsPage() {
     }
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader message="Loading order details..." />;
   if (error) return <div>Error: {error}</div>;
   if (!orderData) return <div>Order not found</div>;
 

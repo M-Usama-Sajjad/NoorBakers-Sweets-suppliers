@@ -14,6 +14,7 @@ import axios from 'axios'
 // Component Imports
 import ProductListTable from '@views/products/list/ProductListTable'
 import ProductCard from '@views/products/list/ProductCard'
+import Loader from '@/components/Loader'
 
 const eCommerceProductsList = () => {
   // State for product data, loading, and errors
@@ -73,9 +74,8 @@ const eCommerceProductsList = () => {
           <ProductCard />
         </Grid>
         <Grid size={{ xs: 12 }}>
-          {loading ? (
-           " Loading products..."
-          ) : (
+        {loading ? <Loader message="Loading data..." />
+          : (
             <ProductListTable productData={products} />
           )}
         </Grid>

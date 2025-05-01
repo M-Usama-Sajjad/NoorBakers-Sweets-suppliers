@@ -32,6 +32,9 @@ import {
   getSortedRowModel
 } from '@tanstack/react-table'
 
+// Axios
+import axios from 'axios'
+
 // Component Imports
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
@@ -68,17 +71,66 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 // Column Definitions
 const columnHelper = createColumnHelper()
 
-const RawProductListTable = ({ productData }) => {
+const RawProductListTable = () => {
   // States
-  const [data] = useState(productData) // Original data remains unchanged
-  const [filteredData, setFilteredData] = useState(() =>
-    productData.filter(item => item.type === 'Raw') // Filter for Raw products only
-  )
+  const [data, setData] = useState([]) // Store fetched products
+  const [filteredData, setFilteredData] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [inputValues, setInputValues] = useState({}) // State to store input values for each product
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   // Hooks
   const { lang: locale } = useParams()
+
+  // Fetch products on mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        if (!token) {
+          throw new Error('No authentication token found')
+        }
+
+        const response = await axios.get('http://localhost:5001/api/products', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const rawData = response?.data?.data
+        console.log('Fetched products:', rawData)
+
+        // Normalize data (handle different response structures)
+        let products = []
+        if (Array.isArray(rawData)) {
+          products = rawData
+        } else if (Array.isArray(rawData?.data)) {
+          products = rawData.data
+        } else if (Array.isArray(rawData?.products)) {
+          products = rawData.products
+        }
+
+        // Filter for Raw products and map to expected format
+        const rawProducts = products
+          .filter(product => product.type === 'Raw')
+          .map(product => ({
+            id: product._id || product.id,
+            productName: product.name || product.productName,
+          }))
+
+        setData(rawProducts)
+        setFilteredData(rawProducts)
+        setLoading(false)
+      } catch (err) {
+        console.error('Fetch error:', err)
+        setError(err.response?.data?.message || 'Failed to fetch products')
+        setLoading(false)
+      }
+    }
+
+    fetchProducts()
+  }, [])
 
   const columns = useMemo(
     () => [
@@ -135,6 +187,30 @@ const RawProductListTable = ({ productData }) => {
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
+
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader title='Raw Products' />
+        <Divider />
+        <Typography align='center' sx={{ p: 6 }}>
+          Loading...
+        </Typography>
+      </Card>
+    )
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardHeader title='Raw Products' />
+        <Divider />
+        <Typography align='center' color='error' sx={{ p: 6 }}>
+          {error}
+        </Typography>
+      </Card>
+    )
+  }
 
   return (
     <Card>

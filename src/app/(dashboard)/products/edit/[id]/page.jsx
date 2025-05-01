@@ -24,6 +24,7 @@ import ProductInventory from '@views/products/edit/ProductInventory'
 import ProductPricing from '@views/products/edit/ProductPricing'
 import ProductOrganize from '@views/products/edit/ProductOrganize'
 import RawProductToggleTable from '@views/products/edit/RawProductToggleTable'
+import Loader from '@/components/Loader'
 
 // Data Fetching Function
 const fetchProduct = async (id, token) => {
@@ -49,6 +50,7 @@ const EditProduct = () => {
     name: '',
     description: '',
     barcode: '',
+    type:"",
     category: '',
     materialType: 'active',
     status: '',
@@ -92,7 +94,8 @@ const EditProduct = () => {
             name: product.name || '',
             description: product.description || '',
             barcode: product.barcode || '',
-            category: product.type || '',
+            type: product.type || 'Raw',
+            category: product.category || '',
             materialType: product.materialType || 'active',
             status: product.status || '',
             quantity: product.quantity?.toString() || '', // Convert number to string for input
@@ -144,8 +147,8 @@ const EditProduct = () => {
       const payload = {
         name: productData.name,
         description: productData.description,
-        type: productData.category,
-        category: productData.subCategory,
+        type: productData.type,
+        category: productData.category,
         materialType: productData.category === 'Raw' ? productData.materialType : undefined,
         supplier: productData.supplier,
         unit: productData.unit,
@@ -195,7 +198,7 @@ const EditProduct = () => {
   console.log('Render productData:', productData)
 
   if (loading) {
-    return <div>Loading...</div>
+    return <Loader message='Loading product data...' />
   }
 
   return (
@@ -212,9 +215,6 @@ const EditProduct = () => {
             <Grid size={{ xs: 12 }}>
               <ProductImage onImageUpload={handleImageUpload}/>
             </Grid>
-            <Grid size={{ xs: 12 }}>
-              <RawProductToggleTable productData={data?.products} />
-            </Grid>
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -228,6 +228,9 @@ const EditProduct = () => {
       <Button variant='contained' color='primary' onClick={handleSubmit} sx={{ mt: 6, ml: 6 }}>
         Update Product
       </Button>
+            <Grid size={{ xs: 12 }}>
+              <RawProductToggleTable productData={data?.products} />
+            </Grid>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
           {message}

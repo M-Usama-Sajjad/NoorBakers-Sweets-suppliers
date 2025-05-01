@@ -67,8 +67,7 @@ const UserDropdown = () => {
     localStorage.removeItem('token')
     router.push('/login')
   }
-  const user = useSelector((state) => state.auth.user)
-  console.log(user?.name)
+  const user = useSelector((state) => state?.auth?.user)
 
   return (
     <>

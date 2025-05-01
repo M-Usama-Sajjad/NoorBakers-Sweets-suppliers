@@ -29,6 +29,7 @@ const eCommerceProductsAdd = () => {
     name: '',
     description: '',
     barcode: '',
+    type: '',
     category: '', // Maps to schema's 'type' (Raw or Ready)
     materialType: 'active', // Default for type: Raw
     status: '',
@@ -67,7 +68,7 @@ const eCommerceProductsAdd = () => {
   const handleSubmit = async () => {
     try {
       // Validate required fields
-      if (!productData.name || !productData.category || !productData.subCategory) {
+      if (!productData.name || !productData.category ) {
         setSuccess(false)
         setMessage('Please fill in all required fields (Name, Category, Subcategory)')
         setOpen(true)
@@ -86,8 +87,9 @@ const eCommerceProductsAdd = () => {
       const payload = {
         name: productData.name,
         description: productData.description,
-        type: productData.category,
-        category: productData.subCategory,
+        type: productData.type,
+        category: productData.category,
+        subCategory: productData.category,
         materialType: productData.category === 'Raw' ? productData.materialType : undefined,
         supplier: productData.supplier,
         unit: productData.unit,
@@ -147,9 +149,6 @@ const eCommerceProductsAdd = () => {
             <Grid size={{ xs: 12 }}>
               <ProductImage onImageUpload={handleImageUpload} />
             </Grid>
-            <Grid size={{ xs: 12 }}>
-              <RawProductToggleTable productData={data?.products} />
-            </Grid>
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -163,6 +162,9 @@ const eCommerceProductsAdd = () => {
       <Button variant='contained' color='primary' onClick={handleSubmit} sx={{ mt: 6, ml: 6 }}>
         Add Product
       </Button>
+            <Grid size={{ xs: 12 }}>
+              <RawProductToggleTable productData={productData} />
+            </Grid>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
           {message}
