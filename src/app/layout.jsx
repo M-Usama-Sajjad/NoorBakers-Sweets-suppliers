@@ -19,7 +19,7 @@ import '@assets/iconify-icons/generated-icons.css'
 import AuthProvider from '@/utils/AuthProvider'
 
 export const metadata = {
-  title: '',
+  title: 'Noor Bakers and Sweets',
   description:
     'Vuexy - MUI Next.js Admin Dashboard Template - is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.'
 }
@@ -36,9 +36,7 @@ const RootLayout = async props => {
       <body className='flex is-full min-bs-full flex-auto flex-col'>
         <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
         <ReduxProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <AuthProvider>{children}</AuthProvider>
         </ReduxProvider>
       </body>
     </html>
