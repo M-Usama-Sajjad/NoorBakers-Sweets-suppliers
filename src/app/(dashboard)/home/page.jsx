@@ -27,7 +27,7 @@ import {
 } from 'chart.js'
 
 // Axios
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Register Chart.js components
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend)
@@ -47,11 +47,7 @@ export default function Page() {
 
     const fetchOrders = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/api/orders', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const response = await axios.get('/orders')
 
         const rawData = response.data
         console.log('Raw data:', rawData)

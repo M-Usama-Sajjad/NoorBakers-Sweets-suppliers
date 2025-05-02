@@ -9,7 +9,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import OrderCard from './OrderCard'

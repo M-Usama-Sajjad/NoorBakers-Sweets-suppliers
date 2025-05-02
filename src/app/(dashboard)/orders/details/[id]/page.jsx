@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 
 // Third-party Imports
-import axios from 'axios';
+import axios from '@/utils/axios';
 
 // Component Imports
 import OrderDetails from '@views/orders/details';

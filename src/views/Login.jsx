@@ -19,7 +19,7 @@ import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import classnames from 'classnames'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Redux Imports
 import { useDispatch } from 'react-redux' // Import useDispatch
@@ -90,7 +90,7 @@ const LoginV2 = ({ mode }) => {
     console.log('Login form submitted:', { email, password })
 
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/login', {
+      const response = await axios.post('/auth/login', {
         email,
         password
       })

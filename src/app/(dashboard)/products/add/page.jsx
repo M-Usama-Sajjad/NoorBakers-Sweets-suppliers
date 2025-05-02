@@ -10,7 +10,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import ProductAddHeader from '@views/products/add/ProductAddHeader'
@@ -67,23 +67,6 @@ const eCommerceProductsAdd = () => {
   // Handle form submission
   const handleSubmit = async () => {
     try {
-      // Validate required fields
-      // if (!productData.name || !productData.category ) {
-      //   setSuccess(false)
-      //   setMessage('Please fill in all required fields (Name, Category, Subcategory)')
-      //   setOpen(true)
-      //   return
-      // }
-
-      // Retrieve token from localStorage
-      const token = localStorage.getItem('token')
-      if (!token) {
-        setSuccess(false)
-        setMessage('No authentication token found. Please log in.')
-        setOpen(true)
-        return
-      }
-
       const payload = {
         name: productData.name,
         description: productData.description,
@@ -110,11 +93,7 @@ const eCommerceProductsAdd = () => {
 
       console.log('Submitting payload:', payload) // For debugging
 
-      const response = await axios.post('http://localhost:5001/api/products/', payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const response = await axios.post('/products/', payload)
 
       setSuccess(true)
       setMessage('Product added successfully!')

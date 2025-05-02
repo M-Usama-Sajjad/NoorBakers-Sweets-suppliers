@@ -17,7 +17,7 @@ import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import { useDropzone } from 'react-dropzone'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import Link from '@components/Link'

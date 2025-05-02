@@ -9,7 +9,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import ProductListTable from '@views/products/list/ProductListTable'
@@ -27,22 +27,14 @@ const eCommerceProductsList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-          throw new Error('No authentication token found. Please log in.')
-        }
-
-        const response = await axios.get('http://localhost:5001/api/products/', {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-         console.log(response.data)
+        const response = await axios.get('/products/')
+        console.log(response.data)
         // Map API data to table's expected format
-        const mappedProducts = response?.data?.data?.map(product => ({          id: product._id,
+        const mappedProducts = response?.data?.data?.map(product => ({
+          id: product._id,
           productName: product.name,
           category: product.category,
-          type:product.type,
+          type: product.type,
           sku: product.sku || 'N/A',
           qty: product.quantity,
           status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
@@ -52,9 +44,9 @@ const eCommerceProductsList = () => {
 
         setProducts(mappedProducts)
         setLoading(false)
-      } catch (err) {
-        setError(err.message || 'Failed to fetch products')
-        setSnackbarOpen(true)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+        setError(error.response?.data?.message || 'Failed to fetch products')
         setLoading(false)
       }
     }

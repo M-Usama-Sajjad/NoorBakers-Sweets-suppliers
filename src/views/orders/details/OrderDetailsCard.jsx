@@ -34,7 +34,7 @@ import {
 } from '@tanstack/react-table'
 
 // Axios
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import Link from '@components/Link'
@@ -214,18 +214,11 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
     setUpdateError(null);
 
     try {
-      const token = localStorage.getItem('token');
       const response = await axios.put(
-        `http://localhost:5001/api/orders/${orderData.id}/status`,
-        { status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+        `/orders/${orderData.id}/status`,
+        { status: newStatus }
       );
 
-      // setUpdatedStatus(newStatus);
       setOrderData({ ...orderData, status: newStatus }); // Update orderData status
       setUpdateLoading(false);
       console.log('Order status updated:', newStatus);

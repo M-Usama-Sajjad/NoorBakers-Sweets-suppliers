@@ -37,7 +37,7 @@ import {
 } from '@tanstack/react-table'
 
 // Axios Import
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -86,12 +86,7 @@ const TaskListTable = () => {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const token = localStorage.getItem('token') // Retrieve token from localStorage
-        const response = await axios.get('http://localhost:5001/api/tasks/', {
-          headers: {
-            Authorization: `Bearer ${token}` // Include token in Authorization header
-          }
-        })
+        const response = await axios.get('/tasks/')
         // Map API response to match frontend schema
         console.log(response.data.data, 'hiiiiii')
         const mappedTasks = response.data.data.map(task => ({
@@ -130,15 +125,9 @@ const TaskListTable = () => {
       // Proceed with status update for non-HACCP tasks or when unmarking
       try {
         const newStatus = task.markdone ? 'pending' : 'completed'
-        const token = localStorage.getItem('token')
         await axios.patch(
-          `http://localhost:5001/api/tasks/${taskId}/status`,
-          { status: newStatus },
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
+          `/tasks/${taskId}/status`,
+          { status: newStatus }
         )
         setTasks(prev =>
           prev.map(t =>
@@ -157,15 +146,9 @@ const TaskListTable = () => {
       return
     }
     try {
-      const token = localStorage.getItem('token')
       await axios.patch(
-        `http://localhost:5001/api/tasks/${selectedTaskId}/status`,
-        { status: 'completed', correctiveActions },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
+        `/tasks/${selectedTaskId}/status`,
+        { status: 'completed', correctiveActions }
       )
       setTasks(prev =>
         prev.map(task =>

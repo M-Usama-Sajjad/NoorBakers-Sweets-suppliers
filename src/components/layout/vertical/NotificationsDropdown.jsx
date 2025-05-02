@@ -21,7 +21,7 @@ import Button from '@mui/material/Button'
 // Third Party Components
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -85,45 +85,8 @@ const NotificationDropdown = () => {
   // Fetch notifications and unread count
   const fetchNotifications = async () => {
     try {
-      const token = localStorage.getItem('token')
-      if (!token) throw new Error('No token found')
-
-      // Fetch notifications
-      const response = await axios.get('http://localhost:5001/api/notifications', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        params: {
-          limit: 100 // Fetch more to display in dropdown
-        }
-      })
-
-      // Map API response to UI format
-      const mappedNotifications = response.data.data.map(notification => ({
-        id: notification._id,
-        title: notification.title,
-        subtitle: notification.message,
-        time: new Date(notification.createdAt).toLocaleString(), // Format date
-        read: notification.isRead,
-        avatarImage: notification.category === 'order' ? '/images/avatars/8.png' : null, // Example: Order notifications get an avatar
-        avatarIcon: notification.category === 'system' ? 'tabler-chart-bar' : null,
-        avatarText: notification.category === 'product' ? 'MG' : null,
-        avatarColor: notification.type === 'success' ? 'success' : 
-                    notification.type === 'error' ? 'error' : 
-                    notification.type === 'warning' ? 'warning' : 'info',
-        avatarSkin: 'light-static',
-        link: notification.link // Add link for navigation
-      }))
-
-      setNotificationsState(mappedNotifications)
-
-      // Fetch unread count
-      const unreadResponse = await axios.get('http://localhost:5001/api/notifications/unread/count', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      setNotificationCount(unreadResponse.data.count)
+      const response = await axios.get('/notifications')
+      setNotificationsState(response.data.data)
     } catch (error) {
       console.error('Error fetching notifications:', error)
     }
@@ -150,14 +113,9 @@ const NotificationDropdown = () => {
   const handleReadNotification = async (event, value, index) => {
     event.stopPropagation()
     try {
-      const token = localStorage.getItem('token')
       const notificationId = notificationsState[index].id
 
-      await axios.put(`http://localhost:5001/api/notifications/${notificationId}/read`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      await axios.put(`/notifications/${notificationId}/read`)
 
       const newNotifications = [...notificationsState]
       newNotifications[index].read = true
@@ -172,14 +130,9 @@ const NotificationDropdown = () => {
   const handleRemoveNotification = async (event, index) => {
     event.stopPropagation()
     try {
-      const token = localStorage.getItem('token')
       const notificationId = notificationsState[index].id
 
-      await axios.delete(`http://localhost:5001/api/notifications/${notificationId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      await axios.delete(`/notifications/${notificationId}`)
 
       const newNotifications = [...notificationsState]
       if (!newNotifications[index].read) {
@@ -195,12 +148,7 @@ const NotificationDropdown = () => {
   // Mark all notifications as read
   const readAllNotifications = async () => {
     try {
-      const token = localStorage.getItem('token')
-      await axios.put('http://localhost:5001/api/notifications/read-all', {}, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      await axios.put('/notifications/read-all')
 
       const newNotifications = notificationsState.map(notification => ({
         ...notification,

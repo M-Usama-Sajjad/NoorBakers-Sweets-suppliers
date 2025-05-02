@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 import { login } from '@/libs/redux/actions/authActions'
 
 const AuthProvider = ({ children }) => {
@@ -19,11 +19,7 @@ const AuthProvider = ({ children }) => {
             if (token) {
                 try {
                     // Fetch user data from backend
-                    const response = await axios.get('http://localhost:5001/api/auth/me', {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    })
+                    const response = await axios.get('/auth/me')
 
                     if (response.data.success && response.data.user) {
                         // Dispatch token and user data to Redux
