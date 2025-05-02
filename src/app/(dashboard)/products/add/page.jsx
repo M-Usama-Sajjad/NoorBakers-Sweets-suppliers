@@ -68,12 +68,12 @@ const eCommerceProductsAdd = () => {
   const handleSubmit = async () => {
     try {
       // Validate required fields
-      if (!productData.name || !productData.category ) {
-        setSuccess(false)
-        setMessage('Please fill in all required fields (Name, Category, Subcategory)')
-        setOpen(true)
-        return
-      }
+      // if (!productData.name || !productData.category ) {
+      //   setSuccess(false)
+      //   setMessage('Please fill in all required fields (Name, Category, Subcategory)')
+      //   setOpen(true)
+      //   return
+      // }
 
       // Retrieve token from localStorage
       const token = localStorage.getItem('token')
@@ -89,7 +89,7 @@ const eCommerceProductsAdd = () => {
         description: productData.description,
         type: productData.type,
         category: productData.category,
-        subCategory: productData.category,
+        subCategory: productData.category || "RassMalai",
         materialType: productData.category === 'Raw' ? productData.materialType : undefined,
         supplier: productData.supplier,
         unit: productData.unit,

@@ -25,7 +25,7 @@ const ProductOrganize = ({ productData, onChange }) => {
     if (newCategory.trim() && !categories.includes(newCategory.trim())) {
       const updatedCategories = [...categories, newCategory.trim()];
       setCategories(updatedCategories);
-      onChange('subCategory', newCategory.trim()); // Update the selected category
+      onChange('category', newCategory.trim()); // Update the selected category
       setNewCategory(''); // Reset input
       setShowAddCategory(false); // Hide input field
     }

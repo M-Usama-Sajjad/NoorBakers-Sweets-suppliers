@@ -19,7 +19,7 @@ import '@assets/iconify-icons/generated-icons.css'
 import AuthProvider from '@/utils/AuthProvider'
 
 export const metadata = {
-  title: 'Vuexy - MUI Next.js Admin Dashboard Template',
+  title: '',
   description:
     'Vuexy - MUI Next.js Admin Dashboard Template - is the most developer friendly & highly customizable Admin Dashboard Template based on MUI v5.'
 }

@@ -36,7 +36,7 @@ const Billing = ({ activeStep, isLastStep, handleNext, handlePrev }) => {
             onChange={e => setCardData({ ...cardData, number: e.target.value })}
           />
         </Grid>
-        <Grid size={{ xs: 12, sm: 6 }}>
+        {/* <Grid size={{ xs: 12, sm: 6 }}>
           <CustomTextField
             fullWidth
             name='name'
@@ -46,7 +46,7 @@ const Billing = ({ activeStep, isLastStep, handleNext, handlePrev }) => {
             value={cardData.name}
             onChange={e => setCardData({ ...cardData, name: e.target.value })}
           />
-        </Grid>
+        </Grid> */}
         <Grid size={{ xs: 6, sm: 3 }}>
           <CustomTextField
             fullWidth

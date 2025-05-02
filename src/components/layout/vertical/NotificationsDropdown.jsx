@@ -21,6 +21,7 @@ import Button from '@mui/material/Button'
 // Third Party Components
 import classnames from 'classnames'
 import PerfectScrollbar from 'react-perfect-scrollbar'
+import axios from 'axios'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
@@ -66,65 +67,11 @@ const getAvatar = params => {
   }
 }
 
-
-const notifications = [
-  {
-    avatarImage: '/images/avatars/8.png',
-    title: 'Congratulations Flora 🎉',
-    subtitle: 'Won the monthly bestseller gold badge',
-    time: '1h ago',
-    read: false
-  },
-  {
-    title: 'Cecilia Becker',
-    avatarColor: 'secondary',
-    subtitle: 'Accepted your connection',
-    time: '12h ago',
-    read: false
-  },
-  {
-    avatarImage: '/images/avatars/3.png',
-    title: 'Bernard Woods',
-    subtitle: 'You have new message from Bernard Woods',
-    time: 'May 18, 8:26 AM',
-    read: true
-  },
-  {
-    avatarIcon: 'tabler-chart-bar',
-    title: 'Monthly report generated',
-    subtitle: 'July month financial report is generated',
-    avatarColor: 'info',
-    time: 'Apr 24, 10:30 AM',
-    read: true
-  },
-  {
-    avatarText: 'MG',
-    title: 'Application has been approved 🚀',
-    subtitle: 'Your Meta Gadgets project application has been approved.',
-    avatarColor: 'success',
-    time: 'Feb 17, 12:17 PM',
-    read: true
-  },
-  {
-    avatarIcon: 'tabler-mail',
-    title: 'New message from Harry',
-    subtitle: 'You have new message from Harry',
-    avatarColor: 'error',
-    time: 'Jan 6, 1:48 PM',
-    read: true
-  }
-]
-
 const NotificationDropdown = () => {
-
-
   // States
   const [open, setOpen] = useState(false)
-  const [notificationsState, setNotificationsState] = useState(notifications)
-
-  // Vars
-  const notificationCount = notificationsState.filter(notification => !notification.read).length
-  const readAll = notificationsState.every(notification => notification.read)
+  const [notificationsState, setNotificationsState] = useState([])
+  const [notificationCount, setNotificationCount] = useState(0)
 
   // Refs
   const anchorRef = useRef(null)
@@ -135,54 +82,158 @@ const NotificationDropdown = () => {
   const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
   const { settings } = useSettings()
 
+  // Fetch notifications and unread count
+  const fetchNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      if (!token) throw new Error('No token found')
+
+      // Fetch notifications
+      const response = await axios.get('http://localhost:5001/api/notifications', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        params: {
+          limit: 100 // Fetch more to display in dropdown
+        }
+      })
+
+      // Map API response to UI format
+      const mappedNotifications = response.data.data.map(notification => ({
+        id: notification._id,
+        title: notification.title,
+        subtitle: notification.message,
+        time: new Date(notification.createdAt).toLocaleString(), // Format date
+        read: notification.isRead,
+        avatarImage: notification.category === 'order' ? '/images/avatars/8.png' : null, // Example: Order notifications get an avatar
+        avatarIcon: notification.category === 'system' ? 'tabler-chart-bar' : null,
+        avatarText: notification.category === 'product' ? 'MG' : null,
+        avatarColor: notification.type === 'success' ? 'success' : 
+                    notification.type === 'error' ? 'error' : 
+                    notification.type === 'warning' ? 'warning' : 'info',
+        avatarSkin: 'light-static',
+        link: notification.link // Add link for navigation
+      }))
+
+      setNotificationsState(mappedNotifications)
+
+      // Fetch unread count
+      const unreadResponse = await axios.get('http://localhost:5001/api/notifications/unread/count', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      setNotificationCount(unreadResponse.data.count)
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchNotifications()
+
+    // Optional: Poll for new notifications every 30 seconds
+    const interval = setInterval(fetchNotifications, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
   const handleClose = () => {
     setOpen(false)
   }
 
   const handleToggle = () => {
     setOpen(prevOpen => !prevOpen)
+    if (!open) fetchNotifications() // Refresh notifications when opening
   }
 
-  // Read notification when notification is clicked
-  const handleReadNotification = (event, value, index) => {
+  // Mark notification as read
+  const handleReadNotification = async (event, value, index) => {
     event.stopPropagation()
-    const newNotifications = [...notificationsState]
+    try {
+      const token = localStorage.getItem('token')
+      const notificationId = notificationsState[index].id
 
-    newNotifications[index].read = value
-    setNotificationsState(newNotifications)
+      await axios.put(`http://localhost:5001/api/notifications/${notificationId}/read`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const newNotifications = [...notificationsState]
+      newNotifications[index].read = true
+      setNotificationsState(newNotifications)
+      setNotificationCount(prev => prev - 1) // Update unread count
+    } catch (error) {
+      console.error('Error marking notification as read:', error)
+    }
   }
 
-  // Remove notification when close icon is clicked
-  const handleRemoveNotification = (event, index) => {
+  // Remove notification
+  const handleRemoveNotification = async (event, index) => {
     event.stopPropagation()
-    const newNotifications = [...notificationsState]
+    try {
+      const token = localStorage.getItem('token')
+      const notificationId = notificationsState[index].id
 
-    newNotifications.splice(index, 1)
-    setNotificationsState(newNotifications)
+      await axios.delete(`http://localhost:5001/api/notifications/${notificationId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      const newNotifications = [...notificationsState]
+      if (!newNotifications[index].read) {
+        setNotificationCount(prev => prev - 1) // Update unread count if unread
+      }
+      newNotifications.splice(index, 1)
+      setNotificationsState(newNotifications)
+    } catch (error) {
+      console.error('Error deleting notification:', error)
+    }
   }
 
-  // Read or unread all notifications when read all icon is clicked
-  const readAllNotifications = () => {
-    const newNotifications = [...notificationsState]
+  // Mark all notifications as read
+  const readAllNotifications = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      await axios.put('http://localhost:5001/api/notifications/read-all', {}, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
 
-    newNotifications.forEach(notification => {
-      notification.read = !readAll
-    })
-    setNotificationsState(newNotifications)
+      const newNotifications = notificationsState.map(notification => ({
+        ...notification,
+        read: true
+      }))
+      setNotificationsState(newNotifications)
+      setNotificationCount(0)
+    } catch (error) {
+      console.error('Error marking all notifications as read:', error)
+    }
+  }
+
+  // Navigate to notification link (if available)
+  const handleNotificationClick = (event, notification) => {
+    event.stopPropagation()
+    handleReadNotification(event, true, notificationsState.findIndex(n => n.id === notification.id))
+    if (notification.link) {
+      window.location.href = notification.link // Navigate to the link
+    }
   }
 
   useEffect(() => {
     const adjustPopoverHeight = () => {
       if (ref.current) {
-        // Calculate available height, subtracting any fixed UI elements' height as necessary
         const availableHeight = window.innerHeight - 100
-
         ref.current.style.height = `${Math.min(availableHeight, 550)}px`
       }
     }
 
     window.addEventListener('resize', adjustPopoverHeight)
   }, [])
+
+  const readAll = notificationsState.every(notification => notification.read)
 
   return (
     <>
@@ -261,6 +312,7 @@ const NotificationDropdown = () => {
                   <ScrollWrapper hidden={hidden}>
                     {notificationsState.map((notification, index) => {
                       const {
+                        id,
                         title,
                         subtitle,
                         time,
@@ -274,11 +326,11 @@ const NotificationDropdown = () => {
 
                       return (
                         <div
-                          key={index}
+                          key={id}
                           className={classnames('flex plb-3 pli-4 gap-3 cursor-pointer hover:bg-actionHover group', {
                             'border-be': index !== notificationsState.length - 1
                           })}
-                          onClick={e => handleReadNotification(e, true, index)}
+                          onClick={(e) => handleNotificationClick(e, notification)}
                         >
                           {getAvatar({ avatarImage, avatarIcon, title, avatarText, avatarColor, avatarSkin })}
                           <div className='flex flex-col flex-auto'>

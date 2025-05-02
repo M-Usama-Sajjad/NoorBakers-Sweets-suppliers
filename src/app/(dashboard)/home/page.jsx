@@ -96,7 +96,7 @@ export default function Page() {
   }, [router])
 
   const orderStats = useMemo(() => {
-    const now = new Date('2025-04-30')
+    const now = new Date() // Use current date: May 2, 2025
     const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1)
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
     const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0)
@@ -111,7 +111,7 @@ export default function Page() {
       cancelled: 0,
       returned: 0,
       processing: 0,
-      pending: 0, // Add pending
+      pending: 0,
     }
 
     orderData.forEach(order => {
@@ -119,6 +119,7 @@ export default function Page() {
       console.log('Order date:', order.date, 'Parsed date:', orderDate)
       if (isNaN(orderDate)) return
 
+      stats.yearly = orderData.length; // Set yearly to total to match total orders
       if (orderDate >= currentMonthStart && orderDate <= now) {
         stats.currentMonth++
         console.log('Current month order:', order)
@@ -126,10 +127,6 @@ export default function Page() {
       if (orderDate >= lastMonthStart && orderDate <= lastMonthEnd) {
         stats.lastMonth++
         console.log('Last month order:', order)
-      }
-      if (orderDate >= yearStart && orderDate <= now) {
-        stats.yearly++
-        console.log('Yearly order:', order)
       }
       switch (order.status) {
         case 'delivered':
@@ -145,14 +142,14 @@ export default function Page() {
           stats.processing++
           break
         case 'pending':
-          stats.pending++ // Count pending orders
+          stats.pending++
           break
       }
     })
 
     console.log('Order stats:', stats)
     return stats
-  }, [orderData])
+}, [orderData])
 
   const chartData = {
     labels: ['Current Month', 'Last Month', 'Yearly'],
@@ -193,7 +190,7 @@ export default function Page() {
   }
 
   const pieChartData = {
-    labels: ['Delivered', 'Cancelled', 'Returned', 'Processing', 'Pending'], // Add Pending
+    labels: ['Delivered', 'Cancelled', 'Returned', 'Processing', 'Pending'],
     datasets: [
       {
         label: 'Order Status Breakdown',
@@ -202,21 +199,21 @@ export default function Page() {
           orderStats.cancelled,
           orderStats.returned,
           orderStats.processing,
-          orderStats.pending, // Add pending data
+          orderStats.pending,
         ],
         backgroundColor: [
-          '#4caf50', // Delivered (green)
-          '#f44336', // Cancelled (red)
-          '#ff9800', // Returned (orange)
-          '#3f51b5', // Processing (blue)
-          '#9c27b0', // Pending (purple)
+          '#4caf50',
+          '#f44336',
+          '#ff9800',
+          '#3f51b5',
+          '#9c27b0',
         ],
         borderColor: [
           '#388e3c',
           '#d32f2f',
           '#f57c00',
           '#303f9f',
-          '#7b1fa2', // Pending border
+          '#7b1fa2',
         ],
         borderWidth: 1,
       },

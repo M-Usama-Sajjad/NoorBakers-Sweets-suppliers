@@ -14,7 +14,7 @@ import CustomIconButton from '@core/components/mui/IconButton'
 import CustomTextField from '@core/components/mui/TextField'
 
 const ProductOrganize = ({ productData, onChange }) => {
-  console.log(productData)
+  console.log("in edit",productData.category)
   return (
     <Card>
       <CardHeader title='Organize' />
@@ -36,7 +36,7 @@ const ProductOrganize = ({ productData, onChange }) => {
               select
               fullWidth
               label='Category'
-              value={productData?.category || ''}
+              value={productData?.category || ''} 
               onChange={e => onChange('category', e.target.value)}
             >
               <MenuItem value=''>Select Category</MenuItem>

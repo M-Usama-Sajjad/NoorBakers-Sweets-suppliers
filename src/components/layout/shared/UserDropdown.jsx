@@ -81,10 +81,9 @@ const UserDropdown = () => {
         <Image
           width={38}
           height={38}
-          variant='rounded'
+          src={user?.profilepic || null}
           ref={anchorRef}
           alt='John Doe'
-          src={user?.profilepic || null}
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]  rounded-full'
         />
@@ -107,8 +106,10 @@ const UserDropdown = () => {
             <Paper className={settings.skin === 'bordered' ? 'border shadow-none' : 'shadow-lg'}>
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
-                  <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
-                    <Image alt='John Doe' src={user?.profilepic || null} width={38} className='rounded-full'
+                  <div className='flex items-center plb-2
+                  
+                  pli-6 gap-2' tabIndex={-1}>
+                    <Image src={user?.profilepic || null }  alt='John Doe' width={38} className='rounded-full'
                       height={38} />
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
