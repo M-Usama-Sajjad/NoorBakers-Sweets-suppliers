@@ -5,7 +5,8 @@ const axiosInstance = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5001/api',
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // This is important for cookies
 })
 
 // Request interceptor to add auth token
@@ -28,14 +29,18 @@ axiosInstance.interceptors.request.use(
     return config
   },
   error => {
+    console.error('Request error:', error)
     return Promise.reject(error)
   }
 )
 
 // Response interceptor to handle errors
 axiosInstance.interceptors.response.use(
-  response => response,
+  response => {
+    return response
+  },
   error => {
+    console.error('Response error:', error)
     if (error.response?.status === 401) {
       // Handle unauthorized access
       localStorage.removeItem('token')
