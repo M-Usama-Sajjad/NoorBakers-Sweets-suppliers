@@ -84,7 +84,7 @@ const LoginV2 = ({ mode }) => {
   const authBackground = useImageVariant(mode, lightImg, darkImg)
   const dispatch = useDispatch() // Initialize useDispatch
 
-  const handleLoginSubmit = async (e) => {
+  const handleLoginSubmit = async e => {
     e.preventDefault()
     setError('') // Clear previous errors
     console.log('Login form submitted:', { email, password })
@@ -123,7 +123,7 @@ const LoginV2 = ({ mode }) => {
     borderedDarkIllustration
   )
 
-  const handleClickShowPassword = () => setIsPasswordShown((show) => !show)
+  const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   return (
     <div className='flex bs-full justify-center'>
@@ -158,19 +158,14 @@ const LoginV2 = ({ mode }) => {
               {error}
             </Typography>
           )}
-          <form
-            noValidate
-            autoComplete='off'
-            onSubmit={handleLoginSubmit}
-            className='flex flex-col gap-5'
-          >
+          <form noValidate autoComplete='off' onSubmit={handleLoginSubmit} className='flex flex-col gap-5'>
             <CustomTextField
               autoFocus
               fullWidth
               label='Email or Username'
               placeholder='Enter your email or username'
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
             />
             <CustomTextField
               fullWidth
@@ -179,12 +174,12 @@ const LoginV2 = ({ mode }) => {
               id='outlined-adornment-password'
               type={isPasswordShown ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               slotProps={{
                 input: {
                   endAdornment: (
                     <InputAdornment position='end'>
-                      <IconButton edge='end' onClick={handleClickShowPassword} onMouseDown={(e) => e.preventDefault()}>
+                      <IconButton edge='end' onClick={handleClickShowPassword} onMouseDown={e => e.preventDefault()}>
                         <i className={isPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
                       </IconButton>
                     </InputAdornment>

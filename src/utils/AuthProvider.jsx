@@ -9,39 +9,39 @@ import axios from '@/utils/axios'
 import { login } from '@/libs/redux/actions/authActions'
 
 const AuthProvider = ({ children }) => {
-    const dispatch = useDispatch()
+  const dispatch = useDispatch()
 
-    useEffect(() => {
-        const initializeAuth = async () => {
-            // Check for token in localStorage
-            const token = localStorage.getItem('token')
+  useEffect(() => {
+    const initializeAuth = async () => {
+      // Check for token in localStorage
+      const token = localStorage.getItem('token')
 
-            if (token) {
-                try {
-                    // Fetch user data from backend
-                    const response = await axios.get('/auth/me')
+      if (token) {
+        try {
+          // Fetch user data from backend
+          const response = await axios.get('/auth/me')
 
-                    if (response.data.success && response.data.user) {
-                        // Dispatch token and user data to Redux
-                        console.log("User data fetched successfully:", response.data.user)
-                        dispatch(login(token, response.data.user))
-                    } else {
-                        console.error('Failed to fetch user data:', response.data.message)
-                        // Optionally clear invalid token
-                        localStorage.removeItem('token')
-                    }
-                } catch (error) {
-                    console.error('Error fetching user data:', error.response?.data?.message || error.message)
-                    // Optionally clear invalid token
-                    // localStorage.removeItem('token')
-                }
-            }
+          if (response.data.success && response.data.user) {
+            // Dispatch token and user data to Redux
+            console.log('User data fetched successfully:', response.data.user)
+            dispatch(login(token, response.data.user))
+          } else {
+            console.error('Failed to fetch user data:', response.data.message)
+            // Optionally clear invalid token
+            localStorage.removeItem('token')
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error.response?.data?.message || error.message)
+          // Optionally clear invalid token
+          // localStorage.removeItem('token')
         }
+      }
+    }
 
-        initializeAuth()
-    }, [dispatch])
+    initializeAuth()
+  }, [dispatch])
 
-    return <>{children}</>
+  return <>{children}</>
 }
 
 export default AuthProvider
