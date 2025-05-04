@@ -13,7 +13,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import ProductAddHeader from '@views/products/edit/ProductAddHeader'
@@ -27,13 +27,9 @@ import RawProductToggleTable from '@views/products/edit/RawProductToggleTable'
 import Loader from '@/components/Loader'
 
 // Data Fetching Function
-const fetchProduct = async (id, token) => {
+const fetchProduct = async (id) => {
   try {
-    const response = await axios.get(`http://localhost:5001/api/products/${id}`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
+    const response = await axios.get(`/products/${id}`)
     console.log('Raw API response:', response.data)
     return response.data.data // Adjust for nested 'data' property
   } catch (error) {
@@ -88,7 +84,7 @@ const EditProduct = () => {
     }
 
     if (id) {
-      fetchProduct(id, token)
+      fetchProduct(id)
         .then((product) => {
           const newProductData = {
             name: product.name || '',
@@ -135,15 +131,6 @@ const EditProduct = () => {
   // Handle form submission
   const handleSubmit = async () => {
     try {
-      const token = localStorage.getItem('token')
-
-      if (!token) {
-        setSuccess(false)
-        setMessage('No authentication token found. Please log in.')
-        setOpen(true)
-        return
-      }
-
       const payload = {
         name: productData.name,
         description: productData.description,
@@ -165,14 +152,9 @@ const EditProduct = () => {
         isActive: productData.isActive,
         sku: productData.sku || undefined,
         productImage: productData.productImage || undefined
-
       }
 
-      const response = await axios.patch(`http://localhost:5001/api/products/${id}`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const response = await axios.patch(`/products/${id}`, payload)
 
       setSuccess(true)
       setMessage('Product updated successfully!')

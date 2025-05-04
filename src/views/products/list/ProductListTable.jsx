@@ -37,7 +37,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel
 } from '@tanstack/react-table'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import TableFilters from './TableFilters'
@@ -135,16 +135,7 @@ const ProductListTable = ({ productData }) => {
     }
 
     try {
-      const token = localStorage.getItem('token')
-      if (!token) {
-        throw new Error('No authentication token found. Please log in.')
-      }
-
-      await axios.delete(`http://localhost:5001/api/products/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      await axios.delete(`/products/${id}`)
 
       // Update local state
       setData(prev => prev?.filter(product => product.id !== id))

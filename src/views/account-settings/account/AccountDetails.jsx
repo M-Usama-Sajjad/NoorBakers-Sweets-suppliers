@@ -14,7 +14,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Chip from '@mui/material/Chip'
 
 // Third-party Imports
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
@@ -115,7 +115,6 @@ const AccountDetails = () => {
     if (!user || !formData) return
 
     try {
-      const token = localStorage.getItem('token')
       const updatedData = {
         name: `${formData.firstName} ${formData.lastName}`.trim(),
         email: formData.email,
@@ -125,11 +124,7 @@ const AccountDetails = () => {
         profilepic: profilePicUrl || user.profilepic || null
       }
 
-      const response = await axios.patch(`http://localhost:5001/api/users/${user._id}`, updatedData, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
+      const response = await axios.patch(`/users/${user._id}`, updatedData)
 
       if (response.data.success) {
         console.log('User updated successfully:', response.data)

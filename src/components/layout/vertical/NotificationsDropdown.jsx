@@ -12,9 +12,9 @@ import {
 import useMediaQuery from '@mui/material/useMediaQuery';
 
 // Third Party Components
-import classnames from 'classnames';
-import PerfectScrollbar from 'react-perfect-scrollbar';
-import axios from 'axios';
+import classnames from 'classnames'
+import PerfectScrollbar from 'react-perfect-scrollbar'
+import axios from '@/utils/axios'
 
 // Custom Components & Hooks
 import CustomAvatar from '@core/components/mui/Avatar';
@@ -50,9 +50,20 @@ const NotificationDropdown = () => {
   const anchorRef = useRef(null);
   const popperRef = useRef(null);
 
-  const hidden = useMediaQuery(theme => theme.breakpoints.down('lg'));
-  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'));
-  const { settings } = useSettings();
+  // Hooks
+  const hidden = useMediaQuery(theme => theme.breakpoints.down('lg'))
+  const isSmallScreen = useMediaQuery(theme => theme.breakpoints.down('sm'))
+  const { settings } = useSettings()
+
+  // Fetch notifications and unread count
+  const fetchNotifications = async () => {
+    try {
+      const response = await axios.get('/notifications')
+      setNotificationsState(response.data.data)
+    } catch (error) {
+      console.error('Error fetching notifications:', error)
+    }
+  }
 
   useEffect(() => {
     let isMounted = true;
@@ -126,13 +137,9 @@ const NotificationDropdown = () => {
   const markAsRead = async (e, index) => {
     e.stopPropagation();
     try {
-      const token = localStorage.getItem('token');
-      const { id, read } = notifications[index];
-      if (read) return;
+      const notificationId = notificationsState[index].id
 
-      await axios.put(`http://localhost:5001/api/notifications/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put(`/notifications/${notificationId}/read`)
 
       const updated = [...notifications];
       updated[index].read = true;
@@ -146,12 +153,9 @@ const NotificationDropdown = () => {
   const removeNotification = async (e, index) => {
     e.stopPropagation();
     try {
-      const token = localStorage.getItem('token');
-      const { id, read } = notifications[index];
+      const notificationId = notificationsState[index].id
 
-      await axios.delete(`http://localhost:5001/api/notifications/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.delete(`/notifications/${notificationId}`)
 
       const updated = [...notifications];
       if (!read) setUnreadCount(c => c - 1);
@@ -164,10 +168,7 @@ const NotificationDropdown = () => {
 
   const markAllRead = async () => {
     try {
-      const token = localStorage.getItem('token');
-      await axios.put('http://localhost:5001/api/notifications/read-all', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await axios.put('/notifications/read-all')
 
       const updated = notifications.map(n => ({ ...n, read: true }));
       setNotifications(updated);

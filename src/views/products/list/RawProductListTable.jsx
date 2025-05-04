@@ -33,7 +33,7 @@ import {
 } from '@tanstack/react-table'
 
 // Axios
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import TablePaginationComponent from '@components/TablePaginationComponent'
@@ -87,16 +87,7 @@ const RawProductListTable = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const token = localStorage.getItem('token')
-        if (!token) {
-          throw new Error('No authentication token found')
-        }
-
-        const response = await axios.get('http://localhost:5001/api/products', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        const response = await axios.get('/products')
 
         const rawData = response?.data?.data
         console.log('Fetched products:', rawData)

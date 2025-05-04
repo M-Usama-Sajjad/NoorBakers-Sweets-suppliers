@@ -17,7 +17,7 @@ import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import { useDropzone } from 'react-dropzone'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import Link from '@components/Link'
@@ -66,23 +66,21 @@ const ProductImage = ({ onImageUpload }) => {
     try {
       const formData = new FormData()
       formData.append('image', file)
-      const token = localStorage.getItem('token')
-      const response = await axios.post('http://localhost:5001/api/upload/upload', formData, {
+
+      const response = await axios.post('/upload', formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'multipart/form-data'
-        }
+          'Content-Type': 'multipart/form-data',
+        },
       })
 
-      if (response.data.fileName) {
-        const imageUrl = process.env.NEXT_PUBLIC_FILE_PATH + response.data.fileName
-        setProfilePicUrl(imageUrl)
-        onImageUpload(imageUrl) // Pass the uploaded image URL to parent
+      if (response.data.success) {
+        setProfilePicUrl(response.data.url)
+        onImageUpload(response.data.url)
       } else {
         console.error('Image upload failed:', response.data.message)
       }
     } catch (error) {
-      console.error('Error uploading image:', error.response?.data?.message || error.message)
+      console.error('Error uploading image:', error)
     }
   }
 

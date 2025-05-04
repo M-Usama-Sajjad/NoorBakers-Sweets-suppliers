@@ -24,7 +24,8 @@ import Button from '@mui/material/Button'
 import { useSettings } from '@core/hooks/useSettings'
 import { useSelector } from 'react-redux'
 import Image from 'next/image'
-
+import { getInitials } from '@/utils/getInitials'
+import axios from '@/utils/axios'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -65,9 +66,40 @@ const UserDropdown = () => {
 
   const handleUserLogout = async () => {
     localStorage.removeItem('token')
+    await axios.get('/auth/logout')
     router.push('/login')
   }
-  const user = useSelector((state) => state?.auth?.user)
+  const user = useSelector(state => state?.auth?.user)
+  const state = useSelector(state => state)
+  console.log(user)
+  console.log(state)
+
+  const getAvatarContent = () => {
+    if (user?.profilepic) {
+      return (
+        <Image
+          width={38}
+          height={38}
+          src={user.profilepic}
+          ref={anchorRef}
+          alt={user?.name || 'User'}
+          onClick={handleDropdownOpen}
+          className='cursor-pointer bs-[38px] is-[38px] rounded-full'
+        />
+      )
+    } else {
+      return (
+        <Avatar
+          ref={anchorRef}
+          onClick={handleDropdownOpen}
+          className='cursor-pointer bs-[38px] is-[38px]'
+          sx={{ bgcolor: 'primary.main' }}
+        >
+          {getInitials(user?.name || 'User')}
+        </Avatar>
+      )
+    }
+  }
 
   return (
     <>
@@ -78,15 +110,7 @@ const UserDropdown = () => {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         className='mis-2'
       >
-        <Image
-          width={38}
-          height={38}
-          src={user?.profilepic || null}
-          ref={anchorRef}
-          alt='John Doe'
-          onClick={handleDropdownOpen}
-          className='cursor-pointer bs-[38px] is-[38px]  rounded-full'
-        />
+        {getAvatarContent()}
       </Badge>
       <Popper
         open={open}
@@ -106,11 +130,20 @@ const UserDropdown = () => {
             <Paper className={settings.skin === 'bordered' ? 'border shadow-none' : 'shadow-lg'}>
               <ClickAwayListener onClickAway={e => handleDropdownClose(e)}>
                 <MenuList>
-                  <div className='flex items-center plb-2
-                  
-                  pli-6 gap-2' tabIndex={-1}>
-                    <Image src={user?.profilepic || null }  alt='John Doe' width={38} className='rounded-full'
-                      height={38} />
+                  <div className='flex items-center plb-2 pli-6 gap-2' tabIndex={-1}>
+                    {user?.profilepic ? (
+                      <Image
+                        src={user.profilepic}
+                        alt={user?.name || 'User'}
+                        width={38}
+                        height={38}
+                        className='rounded-full'
+                      />
+                    ) : (
+                      <Avatar sx={{ bgcolor: 'primary.main' }} className='bs-[38px] is-[38px]'>
+                        {getInitials(user?.name || 'User')}
+                      </Avatar>
+                    )}
                     <div className='flex items-start flex-col'>
                       <Typography className='font-medium' color='text.primary'>
                         {user?.name}
@@ -121,11 +154,15 @@ const UserDropdown = () => {
                   <Divider className='mlb-1' />
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-user' />
-                    <Typography color='text.primary' onClick={() => (router.push('user-profile'))}>My Profile</Typography>
+                    <Typography color='text.primary' onClick={() => router.push('user-profile')}>
+                      My Profile
+                    </Typography>
                   </MenuItem>
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-settings' />
-                    <Typography color='text.primary' onClick={() => (router.push('account-settings'))}>Settings</Typography>
+                    <Typography color='text.primary' onClick={() => router.push('account-settings')}>
+                      Settings
+                    </Typography>
                   </MenuItem>
                   {/* <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-currency-dollar' />

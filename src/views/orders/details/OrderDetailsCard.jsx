@@ -16,6 +16,8 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
+import Snackbar from '@mui/material/Snackbar'
+import Alert from '@mui/material/Alert'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -34,7 +36,7 @@ import {
 } from '@tanstack/react-table'
 
 // Axios
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 // Component Imports
 import Link from '@components/Link'
@@ -202,134 +204,137 @@ const OrderTable = ({ orderData, order, setOrderData }) => {
 }
 
 const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
-  const [newStatus, setNewStatus] = useState(orderData?.status || 'processing');
-  const [updateLoading, setUpdateLoading] = useState(false);
-  const [updateError, setUpdateError] = useState(null);
-  const [updatedStatus, setUpdatedStatus] = useState(orderData?.status);
+  const [newStatus, setNewStatus] = useState(orderData?.status || 'processing')
+  const [updateLoading, setUpdateLoading] = useState(false)
+  const [updateError, setUpdateError] = useState(null)
+  const [updatedStatus, setUpdatedStatus] = useState(orderData?.status)
+  const [open, setOpen] = useState(false)
+  const [success, setSuccess] = useState(false)
+  const [message, setMessage] = useState('')
 
-  const canUpdateStatus = updatedStatus !== 'cancelled' && updatedStatus !== 'delivered';
+  const canUpdateStatus = updatedStatus !== 'cancelled' && updatedStatus !== 'delivered'
 
   const handleUpdateStatus = async () => {
-    setUpdateLoading(true);
-    setUpdateError(null);
+    setUpdateLoading(true)
+    setUpdateError(null)
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await axios.put(
-        `http://localhost:5001/api/orders/${orderData.id}/status`,
-        { status: newStatus },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.put(`/orders/${orderData.id}/status`, { status: newStatus })
 
-      // setUpdatedStatus(newStatus);
-      setOrderData({ ...orderData, status: newStatus }); // Update orderData status
-      setUpdateLoading(false);
-      console.log('Order status updated:', newStatus);
-      console.log('Status updated:', response.data);
+      setOrderData({ ...orderData, status: newStatus })
+      setUpdateLoading(false)
+      setSuccess(true)
+      setMessage(`Order status updated to ${newStatus}`)
+      setOpen(true)
     } catch (err) {
-      setUpdateError(err.response?.data?.message || 'Failed to update status');
-      setUpdateLoading(false);
-      console.error('Update error:', err);
+      setUpdateError(err.response?.data?.message || 'Failed to update status')
+      setUpdateLoading(false)
+      setSuccess(false)
+      setMessage(err.response?.data?.message || 'Failed to update status')
+      setOpen(true)
     }
-  };
+  }
+
+  const handleClose = () => {
+    setOpen(false)
+  }
 
   // Compute totals from products
-  const subtotal = orderData.products
-    .reduce((sum, item) => sum + item.price * item.quantity, 0)
-    .toFixed(2);
-  const shippingFee = 2;
-  const tax = 28;
-  const total = orderData.totalAmount.toFixed(2);
+  const subtotal = orderData.products.reduce((sum, item) => sum + item.price * item.quantity, 0).toFixed(2)
+  const shippingFee = 2
+  const tax = 28
+  const total = orderData.totalAmount.toFixed(2)
 
   return (
-    <Card>
-      <CardHeader
-        title='Order Details'
-        action={
-          <Typography component={Link} color='primary.main' className='font-medium'>
-            Edit
-          </Typography>
-        }
-      />
-      <OrderTable orderData={orderData} order={order} />
-      <CardContent>
-        <Box className='flex justify-between items-center mb-4'>
-          <Typography color='text.primary'>
-            Status: {updatedStatus}
-          </Typography>
-          {canUpdateStatus && (
-            <Box display='flex' alignItems='center' gap={2}>
-              <FormControl size='small'>
-                <InputLabel>Status</InputLabel>
-                <Select
-                  value={newStatus}
-                  label='Status'
-                  onChange={(e) => setNewStatus(e.target.value)}
-                  disabled={updateLoading}
+    <>
+      <Card>
+        <CardHeader
+          title='Order Details'
+          action={
+            <Typography component={Link} color='primary.main' className='font-medium'>
+              Edit
+            </Typography>
+          }
+        />
+        <OrderTable orderData={orderData} order={order} />
+        <CardContent>
+          <Box className='flex justify-between items-center mb-4'>
+            <Typography color='text.primary'>Status: {updatedStatus}</Typography>
+            {canUpdateStatus && (
+              <Box display='flex' alignItems='center' gap={2}>
+                <FormControl size='small'>
+                  <InputLabel>Status</InputLabel>
+                  <Select
+                    value={newStatus}
+                    label='Status'
+                    onChange={e => setNewStatus(e.target.value)}
+                    disabled={updateLoading}
+                  >
+                    <MenuItem value='processing'>Processing</MenuItem>
+                    <MenuItem value='delivered'>Delivered</MenuItem>
+                    <MenuItem value='cancelled'>Cancelled</MenuItem>
+                    <MenuItem value='returned'>Returned</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button
+                  variant='contained'
+                  onClick={handleUpdateStatus}
+                  disabled={updateLoading || newStatus === updatedStatus}
                 >
-                  <MenuItem value='processing'>Processing</MenuItem>
-                  <MenuItem value='delivered'>Delivered</MenuItem>
-                  <MenuItem value='cancelled'>Cancelled</MenuItem>
-                  <MenuItem value='returned'>Returned</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                variant='contained'
-                onClick={handleUpdateStatus}
-                disabled={updateLoading || newStatus === updatedStatus}
-              >
-                {updateLoading ? <CircularProgress size={24} /> : 'Update Status'}
-              </Button>
-            </Box>
+                  {updateLoading ? <CircularProgress size={24} /> : 'Update Status'}
+                </Button>
+              </Box>
+            )}
+          </Box>
+          {updateError && (
+            <Typography color='error' align='center' sx={{ mb: 2 }}>
+              {updateError}
+            </Typography>
           )}
-        </Box>
-        {updateError && (
-          <Typography color='error' align='center' sx={{ mb: 2 }}>
-            {updateError}
-          </Typography>
-        )}
-        <Box className='flex justify-end'>
-          <div>
-            <div className='flex items-center gap-12'>
-              <Typography color='text.primary' className='min-is-[100px]'>
-                Subtotal:
-              </Typography>
-              <Typography color='text.primary' className='font-medium'>
-                ${subtotal}
-              </Typography>
+          <Box className='flex justify-end'>
+            <div>
+              <div className='flex items-center gap-12'>
+                <Typography color='text.primary' className='min-is-[100px]'>
+                  Subtotal:
+                </Typography>
+                <Typography color='text.primary' className='font-medium'>
+                  ${subtotal}
+                </Typography>
+              </div>
+              <div className='flex items-center gap-12'>
+                <Typography color='text.primary' className='min-is-[100px]'>
+                  Shipping Fee:
+                </Typography>
+                <Typography color='text.primary' className='font-medium'>
+                  ${shippingFee}
+                </Typography>
+              </div>
+              <div className='flex items-center gap-12'>
+                <Typography color='text.primary' className='min-is-[100px]'>
+                  Tax:
+                </Typography>
+                <Typography color='text.primary' className='font-medium'>
+                  ${tax}
+                </Typography>
+              </div>
+              <div className='flex items-center gap-12'>
+                <Typography color='text.primary' className='font-medium min-is-[100px]'>
+                  Total:
+                </Typography>
+                <Typography color='text.primary' className='font-medium'>
+                  ${total}
+                </Typography>
+              </div>
             </div>
-            <div className='flex items-center gap-12'>
-              <Typography color='text.primary' className='min-is-[100px]'>
-                Shipping Fee:
-              </Typography>
-              <Typography color='text.primary' className='font-medium'>
-                ${shippingFee}
-              </Typography>
-            </div>
-            <div className='flex items-center gap-12'>
-              <Typography color='text.primary' className='min-is-[100px]'>
-                Tax:
-              </Typography>
-              <Typography color='text.primary' className='font-medium'>
-                ${tax}
-              </Typography>
-            </div>
-            <div className='flex items-center gap-12'>
-              <Typography color='text.primary' className='font-medium min-is-[100px]'>
-                Total:
-              </Typography>
-              <Typography color='text.primary' className='font-medium'>
-                ${total}
-              </Typography>
-            </div>
-          </div>
-        </Box>
-      </CardContent>
-    </Card>
+          </Box>
+        </CardContent>
+      </Card>
+      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
+          {message}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }
 

@@ -12,7 +12,7 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import CustomIconButton from '@core/components/mui/IconButton'
 import CustomTextField from '@core/components/mui/TextField'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 const ProductOrganize = ({ productData, onChange }) => {
   // State for managing categories
@@ -34,13 +34,7 @@ const ProductOrganize = ({ productData, onChange }) => {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const token = localStorage.getItem('token')
-
-        const response = await axios.get('http://localhost:5001/api/products', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }) // Adjust the URL as needed
+        const response = await axios.get('/products')
         
         // Extract unique categories from response.data.data
         const rawData = response?.data?.data || [];
