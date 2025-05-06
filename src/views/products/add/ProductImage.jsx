@@ -1,4 +1,3 @@
-// ProductImage.jsx
 'use client'
 
 // React Imports
@@ -66,16 +65,19 @@ const ProductImage = ({ onImageUpload }) => {
     try {
       const formData = new FormData()
       formData.append('image', file)
-
-      const response = await axios.post('/upload', formData, {
+      const response = await axios.post('/upload/upload', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       })
-
-      if (response.data.success) {
-        setProfilePicUrl(response.data.url)
-        onImageUpload(response.data.url)
+      console.log('API response:', response.data)
+      if (response.data.message === 'File uploaded successfully') {
+        // Use filePath and convert to a valid URL
+        const imageUrl = process.env.NEXT_PUBLIC_FILE_PATH + response.data.fileName
+        // Optionally prepend base URL if needed
+        // const imageUrl = `http://your-server.com/${response.data.filePath.replace(/\\/g, '/')}`
+        setProfilePicUrl(imageUrl)
+        onImageUpload(imageUrl)
       } else {
         console.error('Image upload failed:', response.data.message)
       }
@@ -93,19 +95,25 @@ const ProductImage = ({ onImageUpload }) => {
   }
 
   const handleRemoveFile = file => {
-    const uploadedFiles = files
-    const filtered = uploadedFiles.filter(i => i.name !== file.name)
-    setFiles([...filtered])
-    setImgSrc(null)
-    setProfilePicUrl(null)
-    onImageUpload(null) // Reset image URL in parent
+    if (window.confirm(`Are you sure you want to remove ${file.name}?`)) {
+      console.log('Removing file:', file.name)
+      const uploadedFiles = files
+      const filtered = uploadedFiles.filter(i => i.name !== file.name)
+      setFiles([...filtered])
+      setImgSrc(null)
+      setProfilePicUrl(null)
+      onImageUpload(null)
+    }
   }
 
   const handleRemoveAllFiles = () => {
-    setFiles([])
-    setImgSrc(null)
-    setProfilePicUrl(null)
-    onImageUpload(null) // Reset image URL in parent
+    if (window.confirm('Are you sure you want to remove all files?')) {
+      console.log('Removing all files')
+      setFiles([])
+      setImgSrc(null)
+      setProfilePicUrl(null)
+      onImageUpload(null)
+    }
   }
 
   const fileList = files.map(file => (

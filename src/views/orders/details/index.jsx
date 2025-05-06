@@ -20,9 +20,9 @@ const OrderDetails = ({ orderData, order, setOrderData }) => {
           <Grid size={{ xs: 12 }}>
             <OrderDetailsCard orderData={orderData} order={orderData.order} setOrderData={setOrderData}/>
           </Grid>
-          <Grid size={{ xs: 12 }}>
+          {/* <Grid size={{ xs: 12 }}>
             <ShippingActivity order={order} />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
@@ -33,9 +33,9 @@ const OrderDetails = ({ orderData, order, setOrderData }) => {
           <Grid size={{ xs: 12 }}>
             <ShippingAddress orderData={orderData} order={orderData.order} />
           </Grid>
-          <Grid size={{ xs: 12 }}>
+          {/* <Grid size={{ xs: 12 }}>
             <BillingAddress />
-          </Grid>
+          </Grid> */}
         </Grid>
       </Grid>
     </Grid>

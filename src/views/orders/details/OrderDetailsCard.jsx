@@ -204,7 +204,7 @@ const OrderTable = ({ orderData, order, setOrderData }) => {
 }
 
 const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
-  const [newStatus, setNewStatus] = useState(orderData?.status || 'processing')
+  const [newStatus, setNewStatus] = useState(orderData?.status || 'pending')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [updateError, setUpdateError] = useState(null)
   const [updatedStatus, setUpdatedStatus] = useState(orderData?.status)
@@ -213,7 +213,8 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
   const [message, setMessage] = useState('')
 
   const canUpdateStatus = updatedStatus !== 'cancelled' && updatedStatus !== 'delivered'
-
+   
+  console.log(newStatus, 'newStatus')
   const handleUpdateStatus = async () => {
     setUpdateLoading(true)
     setUpdateError(null)
@@ -250,11 +251,11 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
       <Card>
         <CardHeader
           title='Order Details'
-          action={
-            <Typography component={Link} color='primary.main' className='font-medium'>
-              Edit
-            </Typography>
-          }
+          // action={
+          //   <Typography component={Link} color='primary.main' className='font-medium'>
+          //     Edit
+          //   </Typography>
+          // }
         />
         <OrderTable orderData={orderData} order={order} />
         <CardContent>
@@ -269,6 +270,8 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
                     label='Status'
                     onChange={e => setNewStatus(e.target.value)}
                     disabled={updateLoading}
+                    className='min-w-[135px]'
+                    
                   >
                     <MenuItem value='processing'>Processing</MenuItem>
                     <MenuItem value='delivered'>Delivered</MenuItem>

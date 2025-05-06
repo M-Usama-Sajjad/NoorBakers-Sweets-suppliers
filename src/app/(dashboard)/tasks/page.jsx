@@ -9,19 +9,12 @@ import { useParams } from 'next/navigation'
 
 // MUI Imports
 import Card from '@mui/material/Card'
-import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Divider from '@mui/material/Divider'
-import IconButton from '@mui/material/IconButton'
 import Switch from '@mui/material/Switch'
 import MenuItem from '@mui/material/MenuItem'
 import TablePagination from '@mui/material/TablePagination'
 import Typography from '@mui/material/Typography'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
@@ -43,7 +36,6 @@ import axios from '@/utils/axios'
 
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
-import OptionMenu from '@core/components/option-menu'
 import TablePaginationComponent from '@components/TablePaginationComponent'
 
 // Util Imports
@@ -75,14 +67,9 @@ const TaskListTable = () => {
   const [rowSelection, setRowSelection] = useState({})
   const [tasks, setTasks] = useState([])
   const [globalFilter, setGlobalFilter] = useState('')
-  const [open, setOpen] = useState(false) // For add task dialog
-  const [name, setName] = useState('')
-  const [detail, setDetail] = useState('')
-  const [correctiveActionsOpen, setCorrectiveActionsOpen] = useState(false) // For corrective actions dialog
-  const [correctiveActions, setCorrectiveActions] = useState('')
-  const [selectedTaskId, setSelectedTaskId] = useState(null)
   const [success, setSuccess] = useState(false)
   const [message, setMessage] = useState('')
+  const [snackbarOpen, setSnackbarOpen] = useState(false)
 
   const { lang: locale } = useParams()
 
@@ -99,7 +86,8 @@ const TaskListTable = () => {
           detail: task.description,
           createdAt: new Date(task.createdAt),
           markdone: task.status === 'completed' || task.status === 'verified',
-          type: task.type // Include task type to identify HACCP tasks
+          type: task.type,
+          priority: task.priority
         }))
         setTasks(mappedTasks)
       } catch (error) {
@@ -122,87 +110,26 @@ const TaskListTable = () => {
   const handleToggleMarkDone = useCallback(
     async taskId => {
       const task = tasks.find(t => t.id === taskId)
-      if (task.type === 'haccp' && !task.markdone) {
-        // Open dialog for corrective actions if task is HACCP and being marked as done
-        setSelectedTaskId(taskId)
-        setCorrectiveActionsOpen(true)
-      } else {
-        // Proceed with status update for non-HACCP tasks or when unmarking
-        try {
-          const newStatus = task.markdone ? 'pending' : 'completed'
-          await axios.patch(`/tasks/${taskId}/status`, { status: newStatus })
-          setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, markdone: !t.markdone } : t)))
-          setSuccess(true)
-          setMessage(`Task marked as ${newStatus}`)
-          setOpen(true)
-        } catch (error) {
-          console.error('Error updating task status:', error)
-          setSuccess(false)
-          setMessage('Failed to update task status')
-          setOpen(true)
-        }
+      try {
+        const newStatus = task.markdone ? 'pending' : 'completed'
+        await axios.patch(`/tasks/${taskId}/status`, { status: newStatus })
+        setTasks(prev => prev.map(t => (t.id === taskId ? { ...t, markdone: !t.markdone } : t)))
+        setSuccess(true)
+        setMessage(`Task marked as ${newStatus}`)
+        setSnackbarOpen(true)
+      } catch (error) {
+        console.error('Error updating task status:', error)
+        setSuccess(false)
+        setMessage('Failed to update task status')
+        setSnackbarOpen(true)
       }
     },
     [tasks]
   )
 
-  const handleCorrectiveActionsSubmit = useCallback(async () => {
-    if (!correctiveActions.trim()) {
-      setSuccess(false)
-      setMessage('Please provide corrective actions')
-      setOpen(true)
-      return
-    }
-    try {
-      await axios.patch(`/tasks/${selectedTaskId}/status`, { status: 'completed', correctiveActions })
-      setTasks(prev => prev.map(task => (task.id === selectedTaskId ? { ...task, markdone: true } : task)))
-      setCorrectiveActionsOpen(false)
-      setCorrectiveActions('')
-      setSelectedTaskId(null)
-      setSuccess(true)
-      setMessage('Task completed with corrective actions')
-      setOpen(true)
-    } catch (error) {
-      console.error('Error updating task status:', error)
-      setSuccess(false)
-      setMessage(error.response?.data?.message || 'Failed to update task status')
-      setOpen(true)
-    }
-  }, [correctiveActions, selectedTaskId])
-
-  const handleCorrectiveActionsClose = () => {
-    setCorrectiveActionsOpen(false)
-    setCorrectiveActions('')
-    setSelectedTaskId(null)
-  }
-
-  const handleDeleteTask = useCallback(taskId => {
-    setTasks(prev => prev.filter(task => task.id !== taskId))
-  }, [])
-
-  const handleOpen = () => setOpen(true)
-  const handleClose = () => {
-    setOpen(false)
-    setName('')
-    setDetail('')
-  }
-
-  const handleSubmit = () => {
-    if (!name.trim() || !detail.trim()) {
-      alert('Please fill in both fields.')
-      return
-    }
-
-    const newTask = {
-      id: Date.now(),
-      name: name.trim(),
-      detail: detail.trim(),
-      createdAt: new Date(),
-      markdone: false
-    }
-
-    setTasks(prev => [...prev, newTask])
-    handleClose()
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false)
+    setMessage('')
   }
 
   const columns = useMemo(
@@ -260,12 +187,12 @@ const TaskListTable = () => {
         header: 'Status',
         cell: ({ row }) => <Typography>{row.original.markdone ? 'Done' : 'Pending'}</Typography>
       }),
-      columnHelper.accessor('timeleft', {
+      columnHelper.accessor('priority', {
         header: 'Priority',
-        cell: ({ row }) => <Typography>{calculateTimeLeft(row.original.createdAt)}</Typography>
+        cell: ({ row }) => <Typography>{row.original.priority || 'N/A'}</Typography>
       })
     ],
-    [handleToggleMarkDone, handleDeleteTask]
+    [handleToggleMarkDone]
   )
 
   const table = useReactTable({
@@ -363,76 +290,9 @@ const TaskListTable = () => {
           page={table.getState().pagination.pageIndex}
           onPageChange={(_, page) => table.setPageIndex(page)}
         />
-
-        {/* Add Task Dialog */}
-        <Dialog open={open} onClose={handleClose} maxWidth='sm' fullWidth>
-          <DialogTitle>
-            <Typography variant='h6'>Add New Task</Typography>
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin='dense'
-              label='Task Name'
-              fullWidth
-              variant='outlined'
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder='e.g., RoomTemperature'
-            />
-            <TextField
-              margin='dense'
-              label='Task Detail'
-              fullWidth
-              variant='outlined'
-              multiline
-              rows={4}
-              value={detail}
-              onChange={e => setDetail(e.target.value)}
-              placeholder='e.g., Monitor room temperature every hour...'
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleClose} color='secondary'>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} variant='contained' color='primary'>
-              Add Task
-            </Button>
-          </DialogActions>
-        </Dialog>
-
-        {/* Corrective Actions Dialog for HACCP Tasks */}
-        <Dialog open={correctiveActionsOpen} onClose={handleCorrectiveActionsClose} maxWidth='sm' fullWidth>
-          <DialogTitle>
-            <Typography variant='h6'>Provide Corrective Actions</Typography>
-          </DialogTitle>
-          <DialogContent>
-            <TextField
-              autoFocus
-              margin='dense'
-              label='Corrective Actions'
-              fullWidth
-              variant='outlined'
-              multiline
-              rows={4}
-              value={correctiveActions}
-              onChange={e => setCorrectiveActions(e.target.value)}
-              placeholder='e.g., Adjust thermostat if temperature exceeds 5°C'
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCorrectiveActionsClose} color='secondary'>
-              Cancel
-            </Button>
-            <Button onClick={handleCorrectiveActionsSubmit} variant='contained' color='primary'>
-              Submit
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Card>
-      <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
+      <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
+        <Alert onClose={handleSnackbarClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
           {message}
         </Alert>
       </Snackbar>

@@ -28,7 +28,7 @@ const renderList = list => {
 const AboutOverview = ({ data }) => {
   return (
    
-        <Card className="w-screen">
+        <Card className="w-full">
           <CardContent className="flex flex-col gap-6">
             <div className="flex flex-col gap-4">
               <Typography className="uppercase" variant="body2" color="text.disabled">

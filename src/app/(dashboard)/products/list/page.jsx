@@ -38,8 +38,9 @@ const eCommerceProductsList = () => {
           sku: product.sku || 'N/A',
           qty: product.quantity,
           status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
-          image: product.productImage || '/images/placeholder.png', // Placeholder if no image
-          productBrand: product.productBrand || 'Unknown' // Placeholder
+          image: product?.productImage && product.productImage.startsWith('http')
+          ? product.productImage
+          : '/images/placeholder.png',          productBrand: product.productBrand || 'Unknown' // Placeholder
         }))
 
         setProducts(mappedProducts)

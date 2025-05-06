@@ -71,7 +71,7 @@ const DebouncedInput = ({ value: initialValue, onChange, debounce = 500, ...prop
 // Column Definitions
 const columnHelper = createColumnHelper()
 
-const RawProductListTable = () => {
+const RawProductListTable = ({ onRawItemsChange }) => {
   // States
   const [data, setData] = useState([]) // Store fetched products
   const [filteredData, setFilteredData] = useState([])
@@ -139,6 +139,14 @@ const RawProductListTable = () => {
                   ...prev,
                   [row.original.id]: value
                 }))
+                // Call onRawItemsChange with the updated item
+                if (typeof onRawItemsChange === 'function') {
+                  const quantity = value === '' ? 0 : parseFloat(value)
+                  if (quantity >= 0) {
+                    console.log('RawProductListTable sending:', { id: row.original.id, quantity }) // Debugging
+                    onRawItemsChange({ id: row.original.id, quantity })
+                  }
+                }
               }
             }}
             inputProps={{ min: 0, step: 0.1 }} // Allow decimals with step of 0.1
@@ -159,7 +167,7 @@ const RawProductListTable = () => {
         )
       })
     ],
-    [data, filteredData, inputValues] // Add inputValues to dependencies
+    [inputValues, onRawItemsChange] // Depend on inputValues and onRawItemsChange
   )
 
   const table = useReactTable({

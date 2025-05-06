@@ -1,13 +1,14 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import Image from 'next/image'
 
 // Third-party Imports
 import axios from '@/utils/axios'
@@ -37,8 +38,7 @@ const eCommerceProductsAdd = () => {
     manufacturingDate: '',
     expiryDate: '',
     subCategory: '', // Maps to schema's 'category' (e.g., Pastries)
-    // Required fields with defaults
-    supplier: '6805693ab8aac0a3c71ae84a', // Replace with authenticated supplier ID if needed
+    supplier: '6805693ab8aac0a3c71ae84a',
     unit: 'pieces',
     price: 0,
     minStockLevel: 0,
@@ -46,17 +46,46 @@ const eCommerceProductsAdd = () => {
     location: 'supplier',
     batchNumber: 'BATCH001',
     isActive: true,
-    productImage: null
+    productImage: null,
+    rawItems: [],
+    convertRawToReady: false
   })
- console.log(productData.status)
-  // State for snackbar
   const [open, setOpen] = useState(false)
   const [success, setSuccess] = useState(false)
   const [message, setMessage] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Log productImage changes
+  useEffect(() => {
+    console.log('productData.productImage changed:', productData.productImage)
+  }, [productData.productImage])
 
   // Handle form data changes
   const handleChange = (field, value) => {
     setProductData(prev => ({ ...prev, [field]: value }))
+  }
+
+  // Handle raw items change
+  const handleRawItemsChange = ({ id, quantity }) => {
+    setProductData(prev => {
+      const currentRawItems = prev.rawItems || []
+      if (quantity <= 0) {
+        const updatedItems = currentRawItems.filter(item => item.id !== id)
+        console.log('Updated rawItems (removed):', updatedItems)
+        return { ...prev, rawItems: updatedItems }
+      } else {
+        const existingItemIndex = currentRawItems.findIndex(item => item.id === id)
+        let updatedItems
+        if (existingItemIndex >= 0) {
+          updatedItems = [...currentRawItems]
+          updatedItems[existingItemIndex] = { id, quantity }
+        } else {
+          updatedItems = [...currentRawItems, { id, quantity }]
+        }
+        console.log('Updated rawItems:', updatedItems)
+        return { ...prev, rawItems: updatedItems }
+      }
+    })
   }
 
   // Handle image upload
@@ -66,7 +95,15 @@ const eCommerceProductsAdd = () => {
 
   // Handle form submission
   const handleSubmit = async () => {
+    if (!productData.productImage) {
+      setSuccess(false)
+      setMessage('Please upload a product image')
+      setOpen(true)
+      return
+    }
+    setIsSubmitting(true)
     try {
+      console.log('productData before payload:', productData)
       const payload = {
         name: productData.name,
         description: productData.description,
@@ -88,13 +125,12 @@ const eCommerceProductsAdd = () => {
         status: productData.status || undefined,
         isActive: productData.isActive,
         sku: productData.sku || undefined,
-        productImage: productData.productImage || undefined
+        productImage: productData.productImage,
+        convertRawToReady: productData.convertRawToReady,
+        rawItems: productData.rawItems
       }
-
-      console.log('Submitting payload:', payload) // For debugging
-
+      console.log('Submitting payload:', payload)
       const response = await axios.post('/products/', payload)
-
       setSuccess(true)
       setMessage('Product added successfully!')
       setOpen(true)
@@ -103,6 +139,8 @@ const eCommerceProductsAdd = () => {
       setSuccess(false)
       setMessage(error.response?.data?.message || 'Failed to add product')
       setOpen(true)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -110,9 +148,6 @@ const eCommerceProductsAdd = () => {
   const handleClose = () => {
     setOpen(false)
   }
-
-  // Mock product data (replace with actual data fetching if needed)
-  const data = { products: [] }
 
   return (
     <>
@@ -128,6 +163,7 @@ const eCommerceProductsAdd = () => {
             <Grid size={{ xs: 12 }}>
               <ProductImage onImageUpload={handleImageUpload} />
             </Grid>
+           
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -138,12 +174,18 @@ const eCommerceProductsAdd = () => {
           </Grid>
         </Grid>
       </Grid>
-      <Button variant='contained' color='primary' onClick={handleSubmit} sx={{ mt: 6, ml: 6 }}>
+      <Grid size={{ xs: 12 }}>
+        <RawProductToggleTable onChange={handleChange} onRawItemsChange={handleRawItemsChange} />
+      </Grid>
+      <Button
+        variant='contained'
+        color='primary'
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+        sx={{ mt: 6, ml: 6 }}
+      >
         Add Product
       </Button>
-            <Grid size={{ xs: 12 }}>
-              <RawProductToggleTable productData={productData} />
-            </Grid>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
           {message}

@@ -38,7 +38,7 @@ const OrderDetailHeader = ({ orderData, order }) => {
   const getStatusColor = (status) => {
     return statusChipColor[status]?.color || 'default' // Fallback to 'default'
   }
-    console.log('OrderDetailHeader orderData:', orderData.status)
+    // console.log('OrderDetailHeader orderData:', orderData.status)
   return (
     <div className='flex flex-wrap justify-between sm:items-center max-sm:flex-col gap-y-4'>
       <div className='flex flex-col items-start gap-1'>

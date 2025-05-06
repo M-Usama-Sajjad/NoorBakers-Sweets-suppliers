@@ -59,7 +59,7 @@ const NotificationDropdown = () => {
   const fetchNotifications = async () => {
     try {
       const response = await axios.get('/notifications')
-      setNotificationsState(response.data.data)
+      setNotifications(response?.data?.data)
     } catch (error) {
       console.error('Error fetching notifications:', error)
     }
@@ -83,7 +83,7 @@ const NotificationDropdown = () => {
           })
         ]);
         console.log('Notification data:', notifRes.data.data);
-        const mapped = notifRes.data.data.map(n => ({
+        const mapped = notifRes?.data?.data.map(n => ({
           id: n._id,
           title: n.title,
           subtitle: n.message,
@@ -137,7 +137,7 @@ const NotificationDropdown = () => {
   const markAsRead = async (e, index) => {
     e.stopPropagation();
     try {
-      const notificationId = notificationsState[index].id
+      const notificationId = notifications[index].id
 
       await axios.put(`/notifications/${notificationId}/read`)
 
@@ -153,12 +153,12 @@ const NotificationDropdown = () => {
   const removeNotification = async (e, index) => {
     e.stopPropagation();
     try {
-      const notificationId = notificationsState[index].id
+      const notificationId = notifications[index].id
 
       await axios.delete(`/notifications/${notificationId}`)
 
       const updated = [...notifications];
-      if (!read) setUnreadCount(c => c - 1);
+      if (!notifications[index].read) setUnreadCount(c => c - 1);
       updated.splice(index, 1);
       setNotifications(updated);
     } catch (err) {

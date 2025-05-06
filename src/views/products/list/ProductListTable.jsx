@@ -179,7 +179,7 @@ const ProductListTable = ({ productData }) => {
         header: 'Product',
         cell: ({ row }) => (
           <div className='flex items-center gap-4'>
-            <Image src={row.original.image || null} width={38} height={38} className='rounded bg-actionHover' alt='product' />
+            <Image src={row?.original?.image || null} width={38} height={38} className='rounded bg-actionHover' alt='product' />
             <div className='flex flex-col'>
               <Typography className='font-medium' color='text.primary'>
                 {row.original.productName}

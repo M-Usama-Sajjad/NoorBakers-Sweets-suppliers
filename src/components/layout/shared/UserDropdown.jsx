@@ -154,13 +154,13 @@ const UserDropdown = () => {
                   <Divider className='mlb-1' />
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-user' />
-                    <Typography color='text.primary' onClick={() => router.push('user-profile')}>
+                    <Typography color='text.primary' onClick={() => { console.log("sent to profile"); router.push('/user-profile'); }}>
                       My Profile
                     </Typography>
                   </MenuItem>
                   <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-settings' />
-                    <Typography color='text.primary' onClick={() => router.push('account-settings')}>
+                    <Typography color='text.primary' onClick={() => { router.push('/account-settings') }}>
                       Settings
                     </Typography>
                   </MenuItem>
