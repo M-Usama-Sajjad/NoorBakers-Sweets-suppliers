@@ -210,9 +210,9 @@ const EditProduct = () => {
       <Button variant='contained' color='primary' onClick={handleSubmit} sx={{ mt: 6, ml: 6 }}>
         Update Product
       </Button>
-            <Grid size={{ xs: 12 }}>
+            {/* <Grid size={{ xs: 12 }}>
               <RawProductToggleTable productData={data?.products} />
-            </Grid>
+            </Grid> */}
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>
         <Alert onClose={handleClose} severity={success ? 'success' : 'error'} sx={{ width: '100%' }}>
           {message}

@@ -9,6 +9,7 @@ import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 
 // Third-party Imports
 import axios from '@/utils/axios'
@@ -64,7 +65,7 @@ const eCommerceProductsAdd = () => {
   const handleChange = (field, value) => {
     setProductData(prev => ({ ...prev, [field]: value }))
   }
-
+  const router = useRouter()
   // Handle raw items change
   const handleRawItemsChange = ({ id, quantity }) => {
     setProductData(prev => {
@@ -103,7 +104,6 @@ const eCommerceProductsAdd = () => {
     }
     setIsSubmitting(true)
     try {
-      console.log('productData before payload:', productData)
       const payload = {
         name: productData.name,
         description: productData.description,
@@ -134,6 +134,8 @@ const eCommerceProductsAdd = () => {
       setSuccess(true)
       setMessage('Product added successfully!')
       setOpen(true)
+      router.push('/products/list')
+      
     } catch (error) {
       console.error('Submission error:', error)
       setSuccess(false)
