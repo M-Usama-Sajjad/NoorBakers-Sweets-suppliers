@@ -294,7 +294,7 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
               {updateError}
             </Typography>
           )}
-          <Box className='flex justify-end'>
+          {/* <Box className='flex justify-end'>
             <div>
               <div className='flex items-center gap-12'>
                 <Typography color='text.primary' className='min-is-[100px]'>
@@ -329,7 +329,7 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
                 </Typography>
               </div>
             </div>
-          </Box>
+          </Box> */}
         </CardContent>
       </Card>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>

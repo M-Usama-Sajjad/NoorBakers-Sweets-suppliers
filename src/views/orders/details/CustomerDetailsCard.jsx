@@ -71,12 +71,7 @@ const CustomerDetails = ({ orderData }) => {
             <Typography color='text.primary' className='font-medium'>
               Contact info
             </Typography>
-            <OpenDialogOnElementClick
-              element={Typography}
-              elementProps={typographyProps('Edit', 'primary', 'cursor-pointer font-medium')}
-              dialog={EditUserInfo}
-              dialogProps={{ data: userData }}
-            />
+         
           </div>
           <Typography>Email: {orderData?.email}</Typography>
           <Typography>{orderData.phone}</Typography>

@@ -72,10 +72,10 @@ const LoginV2 = ({ mode }) => {
   const darkImg = '/images/pages/auth-mask-dark.png'
   const lightImg = '/images/pages/auth-mask-light.png'
   const darkIllustration = '/images/illustrations/auth/v2-login-dark.png'
+
   const lightIllustration = '/images/illustrations/auth/v2-login-light.png'
   const borderedDarkIllustration = '/images/illustrations/auth/v2-login-dark-border.png'
   const borderedLightIllustration = '/images/illustrations/auth/v2-login-light-border.png'
-
   // Hooks
   const router = useRouter()
   const { settings } = useSettings()
@@ -143,6 +143,8 @@ const LoginV2 = ({ mode }) => {
             className={classnames({ 'scale-x-[-1]': theme.direction === 'rtl' })}
           />
         )}
+
+
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
         <Link className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
