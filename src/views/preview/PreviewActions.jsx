@@ -17,7 +17,7 @@ import SendInvoiceDrawer from '@views/shared/SendInvoiceDrawer'
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
 
-const PreviewActions = ({ id, onButtonClick }) => {
+const PreviewActions = ({ id, handleButtonClick, onDownloadClick  }) => {
   // States
   const [paymentDrawerOpen, setPaymentDrawerOpen] = useState(false)
   const [sendDrawerOpen, setSendDrawerOpen] = useState(false)
@@ -38,11 +38,11 @@ const PreviewActions = ({ id, onButtonClick }) => {
           >
             Send Invoice
           </Button> */}
-          <Button fullWidth color='secondary' variant='tonal' className='capitalize'>
+          <Button fullWidth color='success' variant='tonal' className='capitalize' onClick={onDownloadClick}>
             Download
           </Button>
           <div className='flex items-center gap-4'>
-            <Button fullWidth variant="contained"   className='capitalize' onClick={onButtonClick}>
+            <Button fullWidth variant="contained"   className='capitalize' onClick={handleButtonClick}>
               Print
             </Button>
             {/* <Button

@@ -14,6 +14,7 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
+import TextField from '@mui/material/TextField'
 import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import Snackbar from '@mui/material/Snackbar'
@@ -43,6 +44,7 @@ import Link from '@components/Link'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
+import { _isBetween } from 'chart.js/helpers'
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -50,7 +52,7 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
   return itemRank.passed
 }
 
-const OrderTable = ({ orderData, order, setOrderData }) => {
+const OrderTable = ({ orderData, order }) => {
   // States
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
@@ -205,6 +207,7 @@ const OrderTable = ({ orderData, order, setOrderData }) => {
 
 const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
   const [newStatus, setNewStatus] = useState(orderData?.status || 'pending')
+  const [changedBy, setChangedBy] = useState('')
   const [updateLoading, setUpdateLoading] = useState(false)
   const [updateError, setUpdateError] = useState(null)
   const [updatedStatus, setUpdatedStatus] = useState(orderData?.status)
@@ -213,16 +216,18 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
   const [message, setMessage] = useState('')
 
   const canUpdateStatus = updatedStatus !== 'cancelled' && updatedStatus !== 'delivered'
-   
-  console.log(newStatus, 'newStatus')
+
   const handleUpdateStatus = async () => {
     setUpdateLoading(true)
     setUpdateError(null)
 
     try {
-      const response = await axios.put(`/orders/${orderData.id}/status`, { status: newStatus })
+      const response = await axios.put(`/orders/${orderData.id}/status`, { 
+        status: newStatus,
+        changedBy: changedBy
+      })
 
-      setOrderData({ ...orderData, status: newStatus })
+      setOrderData({ ...orderData, status: newStatus, history: [...orderData.history, { status: newStatus, changedBy, changedAt: new Date() }] })
       setUpdateLoading(false)
       setSuccess(true)
       setMessage(`Order status updated to ${newStatus}`)
@@ -251,18 +256,13 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
       <Card>
         <CardHeader
           title='Order Details'
-          // action={
-          //   <Typography component={Link} color='primary.main' className='font-medium'>
-          //     Edit
-          //   </Typography>
-          // }
         />
         <OrderTable orderData={orderData} order={order} />
         <CardContent>
           <Box className='flex justify-between items-center mb-4'>
-            <Typography color='text.primary'>Status: {updatedStatus}</Typography>
+            {/* <Typography color='text.primary'>Status: {updatedStatus}</Typography> */}
             {canUpdateStatus && (
-              <Box display='flex' alignItems='center' gap={2}>
+              <Box display='flex' alignItems='center'  gap={2}>
                 <FormControl size='small'>
                   <InputLabel>Status</InputLabel>
                   <Select
@@ -271,65 +271,41 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
                     onChange={e => setNewStatus(e.target.value)}
                     disabled={updateLoading}
                     className='min-w-[135px]'
-                    
                   >
                     <MenuItem value='processing'>Processing</MenuItem>
-                    <MenuItem value='delivered'>Delivered</MenuItem>
                     <MenuItem value='cancelled'>Cancelled</MenuItem>
                     <MenuItem value='returned'>Returned</MenuItem>
+                    <MenuItem value='delivered'>Delivered</MenuItem>
                   </Select>
                 </FormControl>
+              </Box>
+            )}
+            
+            <div className='flex items-center gap-2'>
+
+           
+
+                <TextField
+                  size='small'
+                  label='Changed By'
+                  value={changedBy}
+                  onChange={e => setChangedBy(e.target.value)}
+                  className='min-w-[135px]'
+                />
                 <Button
                   variant='contained'
                   onClick={handleUpdateStatus}
-                  disabled={updateLoading || newStatus === updatedStatus}
+                  disabled={updateLoading || newStatus === updatedStatus || !changedBy}
                 >
                   {updateLoading ? <CircularProgress size={24} /> : 'Update Status'}
                 </Button>
-              </Box>
-            )}
+             </div>
           </Box>
           {updateError && (
             <Typography color='error' align='center' sx={{ mb: 2 }}>
               {updateError}
             </Typography>
           )}
-          {/* <Box className='flex justify-end'>
-            <div>
-              <div className='flex items-center gap-12'>
-                <Typography color='text.primary' className='min-is-[100px]'>
-                  Subtotal:
-                </Typography>
-                <Typography color='text.primary' className='font-medium'>
-                  ${subtotal}
-                </Typography>
-              </div>
-              <div className='flex items-center gap-12'>
-                <Typography color='text.primary' className='min-is-[100px]'>
-                  Shipping Fee:
-                </Typography>
-                <Typography color='text.primary' className='font-medium'>
-                  ${shippingFee}
-                </Typography>
-              </div>
-              <div className='flex items-center gap-12'>
-                <Typography color='text.primary' className='min-is-[100px]'>
-                  Tax:
-                </Typography>
-                <Typography color='text.primary' className='font-medium'>
-                  ${tax}
-                </Typography>
-              </div>
-              <div className='flex items-center gap-12'>
-                <Typography color='text.primary' className='font-medium min-is-[100px]'>
-                  Total:
-                </Typography>
-                <Typography color='text.primary' className='font-medium'>
-                  ${total}
-                </Typography>
-              </div>
-            </div>
-          </Box> */}
         </CardContent>
       </Card>
       <Snackbar open={open} autoHideDuration={6000} onClose={handleClose}>

@@ -24,8 +24,10 @@ const PreviewCard = ({ orderData }) => {
             <div className='p-6 bg-actionHover rounded'>
               <div className='flex justify-between gap-y-4 flex-col sm:flex-row'>
                 <div className='flex flex-col gap-6'>
-                  <div className='flex items-center gap-2.5'>
-                    <Logo />
+                  <div className='flex items-center gap-2.5 '>
+                    <Typography variant='h5' className='font-bold'>
+                      Noor Bakers & Sweets
+                    </Typography>
                   </div>
                   {/* <div>
                     <Typography color='text.primary'>Office 149, 450 South Brand Brooklyn</Typography>

@@ -35,12 +35,21 @@ const Timeline = styled(MuiTimeline)({
   }
 })
 
-const ShippingActivity = ({ order }) => {
+const ShippingActivity = ({ order, orderData }) => {
+  // Function to format changedAt timestamp
+  const formatTimestamp = (timestamp) => {
+    const date = new Date(timestamp);
+    const day = date.toLocaleString('en-US', { weekday: 'long' });
+    const time = date.toLocaleString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    return `${day} ${time}`;
+  };
+
   return (
     <Card>
-      <CardHeader title='Shipping Activity' />
+      <CardHeader title='Order History' />
       <CardContent>
         <Timeline>
+          {/* Initial order placed item */}
           <TimelineItem>
             <TimelineSeparator>
               <TimelineDot color='primary' />
@@ -56,77 +65,26 @@ const ShippingActivity = ({ order }) => {
               <Typography className='mbe-2'>Your order has been placed successfully</Typography>
             </TimelineContent>
           </TimelineItem>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineDot color='primary' />
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
-                <Typography color='text.primary' className='font-medium'>
-                  Pick-up
+          {/* Dynamic history items */}
+          {orderData?.history?.map((history, index) => (
+            <TimelineItem key={history._id || index }>
+              <TimelineSeparator>
+                <TimelineDot color={index === orderData.history.length - 1 ? 'secondary' : 'primary'} />
+                {index < orderData.history.length - 1 && <TimelineConnector />}
+              </TimelineSeparator>
+              <TimelineContent>
+                <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
+                  <Typography color='text.primary' className='font-medium'>
+                    {history.status.charAt(0).toUpperCase() + history.status.slice(1)}
+                  </Typography>
+                  <Typography variant='caption'>{formatTimestamp(history.changedAt)}</Typography>
+                </div>
+                <Typography className='mbe-2'>
+                  {history.changedBy ? `Status changed by ${history.changedBy}` : 'Status updated'}
                 </Typography>
-                <Typography variant='caption'>Wednesday 11:29 AM</Typography>
-              </div>
-              <Typography className='mbe-2'>Pick-up scheduled with courier</Typography>
-            </TimelineContent>
-          </TimelineItem>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineDot color='primary' />
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
-                <Typography color='text.primary' className='font-medium'>
-                  Dispatched
-                </Typography>
-                <Typography variant='caption'>Thursday 8:15 AM</Typography>
-              </div>
-              <Typography className='mbe-2'>Item has been picked up by courier.</Typography>
-            </TimelineContent>
-          </TimelineItem>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineDot color='primary' />
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
-                <Typography color='text.primary' className='font-medium'>
-                  Package arrived
-                </Typography>
-                <Typography variant='caption'>Saturday 15:20 AM</Typography>
-              </div>
-              <Typography className='mbe-2'>Package arrived at an Amazon facility, NY</Typography>
-            </TimelineContent>
-          </TimelineItem>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineDot color='primary' />
-              <TimelineConnector />
-            </TimelineSeparator>
-            <TimelineContent>
-              <div className='flex flex-wrap items-center justify-between gap-x-2 mbe-2.5'>
-                <Typography color='text.primary' className='font-medium'>
-                  Dispatched for delivery
-                </Typography>
-                <Typography variant='caption'>Today 14:12 PM</Typography>
-              </div>
-              <Typography className='mbe-2'>Package has left an Amazon facility , NY</Typography>
-            </TimelineContent>
-          </TimelineItem>
-          <TimelineItem>
-            <TimelineSeparator>
-              <TimelineDot color='secondary' />
-            </TimelineSeparator>
-            <TimelineContent>
-              <Typography color='text.primary' className='font-medium'>
-                Delivery
-              </Typography>
-              <Typography className='mbe-2'>Package will be delivered by tomorrow</Typography>
-            </TimelineContent>
-          </TimelineItem>
+              </TimelineContent>
+            </TimelineItem>
+          ))}
         </Timeline>
       </CardContent>
     </Card>

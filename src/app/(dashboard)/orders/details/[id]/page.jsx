@@ -82,7 +82,8 @@ export default function OrderDetailsPage() {
           totalAmount: order.totalAmount, // e.g., 109.9
           payment: paymentStatusKey, // e.g., 2 for "pending"
           paymentMethod: order.paymentMethod, // e.g., "bank_transfer"
-          notes: order.notes, // e.g., "Urgent delivery required."
+          notes: order.notes,
+          history: order.history || [] // e.g., "Urgent delivery required."
         };
 
         setOrderData(formattedData);

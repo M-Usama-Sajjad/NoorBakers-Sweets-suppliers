@@ -1,5 +1,8 @@
 'use client'
 
+// React Imports
+import { useState } from 'react'
+
 // MUI Imports
 import Grid from '@mui/material/Grid2'
 import Button from '@mui/material/Button'
@@ -15,20 +18,18 @@ import BillingAddress from './BillingAddressCard'
 import Preview from '@/views/preview'
 
 const OrderDetails = ({ orderData, order, setOrderData }) => {
-  // console.log('orderdata', orderData)
-  // const handlePrint = () => {
-  //   window.print();
-  // };
+  // State to control Preview card visibility
+  const [showPreview, setShowPreview] = useState(false);
+
+  // Handler to toggle Preview card visibility
+  const handleTogglePreview = () => {
+    setShowPreview(!showPreview);
+  };
 
   return (
     <>
       <Grid container spacing={6}>
-        <Grid size={{ xs: 12 }}>
-          {/* <Button variant="contained" onClick={handlePrint}>
-            Print Order
-            
-          </Button> */}
-        </Grid>
+       
         <Grid size={{ xs: 12 }}>
           <OrderDetailHeader orderData={orderData} order={order} setOrderData={setOrderData} />
         </Grid>
@@ -37,9 +38,9 @@ const OrderDetails = ({ orderData, order, setOrderData }) => {
             <Grid size={{ xs: 12 }}>
               <OrderDetailsCard orderData={orderData} order={orderData.order} setOrderData={setOrderData} />
             </Grid>
-            {/* <Grid size={{ xs: 12 }}>
-              <ShippingActivity order={order} />
-            </Grid> */}
+            <Grid size={{ xs: 12 }}>
+              <ShippingActivity order={order} orderData={orderData} />
+            </Grid>
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
@@ -52,11 +53,17 @@ const OrderDetails = ({ orderData, order, setOrderData }) => {
             </Grid>
           </Grid>
         </Grid>
-            <Grid >
-              <Preview orderData={orderData} />
-              </Grid>
+         <Grid size={{ xs: 12 }}>
+          <Button variant="contained" onClick={handleTogglePreview}>
+            {showPreview ? 'Hide Invoice' : 'See Invoice'}
+          </Button>
+        </Grid>
+        {showPreview && (
+          <Grid size={{ xs: 12 }}>
+            <Preview orderData={orderData} />
+          </Grid>
+        )}
       </Grid>
-
     </>
   )
 }
