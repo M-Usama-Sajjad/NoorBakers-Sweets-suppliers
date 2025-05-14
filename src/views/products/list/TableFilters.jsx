@@ -1,3 +1,5 @@
+'use client'
+
 // React Imports
 import { useState, useEffect } from 'react'
 
@@ -9,12 +11,34 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import CustomTextField from '@core/components/mui/TextField'
 
+// Utils Imports
+import axios from '@/utils/axios'
+
 const TableFilters = ({ setData, productData }) => {
   // States
   const [category, setCategory] = useState('')
   const [stock, setStock] = useState('')
   const [type, setType] = useState('')
+  const [categories, setCategories] = useState([])
 
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/products')
+        // Extract unique categories from response.data.data
+        const rawData = response?.data?.data || []
+        const uniqueCategories = [...new Set(rawData.map(item => item.category).filter(category => category))]
+        setCategories(uniqueCategories)
+      } catch (error) {
+        console.error('Failed to fetch categories', error)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  // Filter logic
   useEffect(() => {
     const filteredData = productData?.filter(product => {
       // Filter by category
@@ -67,12 +91,11 @@ const TableFilters = ({ setData, productData }) => {
             }}
           >
             <MenuItem value=''>Select Category</MenuItem>
-            <MenuItem value='Pastries'>Pastries</MenuItem>
-            <MenuItem value='Bread'>Bread</MenuItem>
-            <MenuItem value='Cakes'>Cakes</MenuItem>
-            <MenuItem value='Cookies'>Cookies</MenuItem>
-            <MenuItem value='Pies'>Pies</MenuItem>
-            <MenuItem value='Muffins'>Muffins</MenuItem>
+            {categories.map(category => (
+              <MenuItem key={category} value={category}>
+                {category}
+              </MenuItem>
+            ))}
           </CustomTextField>
         </Grid>
         <Grid size={{ xs: 12, sm: 4 }}>

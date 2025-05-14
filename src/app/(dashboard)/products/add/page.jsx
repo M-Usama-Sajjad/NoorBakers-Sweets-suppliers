@@ -176,9 +176,12 @@ const eCommerceProductsAdd = () => {
           </Grid>
         </Grid>
       </Grid>
+      {
+        productData.type === 'Ready' && 
       <Grid size={{ xs: 12 }}>
         <RawProductToggleTable onChange={handleChange} onRawItemsChange={handleRawItemsChange} />
       </Grid>
+      }
       <Button
         variant='contained'
         color='primary'
