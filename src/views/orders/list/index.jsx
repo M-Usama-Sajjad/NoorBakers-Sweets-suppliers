@@ -32,7 +32,7 @@ const OrderList = () => {
           throw new Error('No authentication token found. Please log in.')
         }
 
-        const response = await axios.get('/api/orders', {
+        const response = await axios.get('/orders', {
           headers: {
             Authorization: `Bearer ${token}`
           }

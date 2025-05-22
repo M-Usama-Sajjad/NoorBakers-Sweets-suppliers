@@ -101,7 +101,10 @@ const NotificationDropdown = () => {
 
         if (isMounted) {
           setNotifications(mapped);
-          setUnreadCount(unreadRes.data.count);
+          const apiUnreadCount = unreadRes.data.count;
+          // Fallback: Compute unread count from notifications if API count is inconsistent
+          const finalUnreadCount = mapped.every(n => n.read) ? 0 : apiUnreadCount;
+          setUnreadCount(finalUnreadCount);
         }
       } catch (err) {
         console.error('Notification fetch error:', err);
@@ -137,7 +140,8 @@ const NotificationDropdown = () => {
   const markAsRead = async (e, index) => {
     e.stopPropagation();
     try {
-      const notificationId = notifications[index].id
+      const notificationId = notifications[index].id;
+      if (notifications[index].read) return; // Skip if already read
 
       await axios.put(`/notifications/${notificationId}/read`)
 
@@ -181,7 +185,7 @@ const NotificationDropdown = () => {
 
   const handleNotificationClick = (e, notification, index) => {
     markAsRead(e, index);
-    router.push("http://localhost:3000/orders/details/" + notification.link);
+    router.push("/orders/details/" + notification.link);
   };
 
   const allRead = notifications.every(n => n.read);
@@ -233,7 +237,7 @@ const NotificationDropdown = () => {
                       <Chip size='small' variant='tonal' color='primary' label={`${unreadCount} New`} />
                     )}
                     {notifications.length > 0 && (
-                      <Tooltip title={allRead ? 'Mark all as unread' : 'Mark all as read'} placement='left'>
+                      <Tooltip title={allRead ? 'Mark all as read' : 'Mark all as unread'} placement='left'>
                         <IconButton size='small' onClick={markAllRead} className='text-textPrimary'>
                           <i className={allRead ? 'tabler-mail' : 'tabler-mail-opened'} />
                         </IconButton>
