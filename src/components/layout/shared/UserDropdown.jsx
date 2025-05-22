@@ -17,7 +17,6 @@ import ClickAwayListener from '@mui/material/ClickAwayListener'
 import MenuList from '@mui/material/MenuList'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
-import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 
 // Hook Imports
@@ -36,6 +35,20 @@ const BadgeContentSpan = styled('span')({
   backgroundColor: 'var(--mui-palette-success-main)',
   boxShadow: '0 0 0 2px var(--mui-palette-background-paper)'
 })
+
+// Styled component to replace MenuItem
+const MenuItemReplacement = styled('div')(({ theme }) => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: theme.spacing(2, 4),
+  cursor: 'pointer',
+  '&:hover': {
+    backgroundColor: theme.palette.action.hover
+  },
+  // Ensure compatibility with mli-2 gap-3 classes
+  marginLeft: theme.spacing(2),
+  gap: theme.spacing(1.5)
+}))
 
 const UserDropdown = () => {
   // States
@@ -152,18 +165,28 @@ const UserDropdown = () => {
                     </div>
                   </div>
                   <Divider className='mlb-1' />
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
+                  <MenuItemReplacement
+                    className='mli-2 gap-3'
+                    onClick={e => {
+                      e.stopPropagation();
+                      console.log("sent to profile");
+                      handleDropdownClose(e, '/user-profile');
+                    }}
+                  >
                     <i className='tabler-user' />
-                    <Typography color='text.primary' onClick={() => { console.log("sent to profile"); router.push('/user-profile'); }}>
-                      My Profile
-                    </Typography>
-                  </MenuItem>
-                  <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
+                    <Typography color='text.primary'>My Profile</Typography>
+                  </MenuItemReplacement>
+                  <MenuItemReplacement
+                    className='mli-2 gap-3'
+                    onClick={e => {
+                      e.stopPropagation();
+                      console.log("sent to settings");
+                      handleDropdownClose(e, '/account-settings');
+                    }}
+                  >
                     <i className='tabler-settings' />
-                    <Typography color='text.primary' onClick={() => { router.push('/account-settings') }}>
-                      Settings
-                    </Typography>
-                  </MenuItem>
+                    <Typography color='text.primary'>Settings</Typography>
+                  </MenuItemReplacement>
                   {/* <MenuItem className='mli-2 gap-3' onClick={e => handleDropdownClose(e)}>
                     <i className='tabler-currency-dollar' />
                     <Typography color='text.primary'>Pricing</Typography>

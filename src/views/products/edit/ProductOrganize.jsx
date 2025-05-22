@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -12,9 +12,48 @@ import MenuItem from '@mui/material/MenuItem'
 // Component Imports
 import CustomIconButton from '@core/components/mui/IconButton'
 import CustomTextField from '@core/components/mui/TextField'
+import axios from '@/utils/axios'
 
 const ProductOrganize = ({ productData, onChange }) => {
-  console.log("in edit", productData.category)
+  // State for managing categories
+  const [categories, setCategories] = useState([]);
+  const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState('');
+
+  // Handle adding a new category
+  const handleAddCategory = () => {
+    if (newCategory.trim() && !categories.includes(newCategory.trim())) {
+      const updatedCategories = [...categories, newCategory.trim()];
+      setCategories(updatedCategories);
+      onChange('category', newCategory.trim()); // Update the selected category
+      setNewCategory(''); // Reset input
+      setShowAddCategory(false); // Hide input field
+    }
+  };
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/products');
+        
+        // Extract unique categories from response.data.data
+        const rawData = response?.data?.data || [];
+        const uniqueCategories = [...new Set(rawData.map(item => item.category).filter(category => category))];
+        
+        // Include productData.category if it exists and isn't already in the list
+        if (productData?.category && !uniqueCategories.includes(productData.category)) {
+          uniqueCategories.push(productData.category);
+        }
+        
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error("Failed to fetch categories", error);
+      }
+    };
+  
+    fetchCategories();
+  }, [productData?.category]); // Add productData.category as a dependency to re-run if it changes
+
   return (
     <Card>
       <CardHeader title='Organize' />
@@ -32,22 +71,48 @@ const ProductOrganize = ({ productData, onChange }) => {
             <MenuItem value='Ready'>Ready</MenuItem>
           </CustomTextField>
           <div className='flex items-end gap-4'>
-            <CustomTextField
-              select 
-              fullWidth
-              label='Category'
-              value={productData?.category || ''}
-              onChange={e => onChange('category', e.target.value)}
+            {!showAddCategory ? (
+              <CustomTextField
+                select
+                fullWidth
+                label='Category'
+                value={productData?.category || ''}
+                onChange={e => onChange('category', e.target.value)}
+              >
+                <MenuItem value=''>Select Category</MenuItem>
+                {categories?.map(category => (
+                  <MenuItem key={category} value={category}>
+                    {category}
+                  </MenuItem>
+                ))}
+              </CustomTextField>
+            ) : (
+              <CustomTextField
+                fullWidth
+                label='Add New Category'
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value)}
+                onKeyPress={e => {
+                  if (e.key === 'Enter') {
+                    handleAddCategory();
+                    e.preventDefault();
+                  }
+                }}
+                autoFocus
+              />
+            )}
+            <CustomIconButton
+              variant='tonal'
+              color='primary'
+              className='min-is-fit'
+              onClick={() => {
+                if (showAddCategory) {
+                  handleAddCategory();
+                } else {
+                  setShowAddCategory(true);
+                }
+              }}
             >
-              <MenuItem value=''>Select Category</MenuItem>
-              <MenuItem value='Pastries'>Pastries</MenuItem>
-              <MenuItem value='Bread'>Bread</MenuItem>
-              <MenuItem value='Cakes'>Cakes</MenuItem>
-              <MenuItem value='Cookies'>Cookies</MenuItem>
-              <MenuItem value='Pies'>Pies</MenuItem>
-              <MenuItem value='Muffins'>Muffins</MenuItem>
-            </CustomTextField>
-            <CustomIconButton variant='tonal' color='primary' className='min-is-fit'>
               <i className='tabler-plus' />
             </CustomIconButton>
           </div>
@@ -55,7 +120,7 @@ const ProductOrganize = ({ productData, onChange }) => {
             select
             fullWidth
             label='Status'
-            value={productData.status || ''}
+            value={productData?.status || ''}
             onChange={e => onChange('status', e.target.value)}
           >
             <MenuItem value='active'>Active</MenuItem>
@@ -65,15 +130,14 @@ const ProductOrganize = ({ productData, onChange }) => {
             fullWidth
             label='Qty'
             placeholder='Quantity'
-            type='number'
-            value={productData.quantity || ''}
+            value={productData?.quantity || ''}
             onChange={e => onChange('quantity', e.target.value)}
           />
           <CustomTextField
             fullWidth
             label='Manufacturing Date'
             type='date'
-            value={productData.manufacturingDate ? productData.manufacturingDate.split('T')[0] : ''}
+            value={productData?.manufacturingDate ? productData.manufacturingDate.split('T')[0] : ''}
             onChange={e => onChange('manufacturingDate', e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
@@ -81,7 +145,7 @@ const ProductOrganize = ({ productData, onChange }) => {
             fullWidth
             label='Expiry Date'
             type='date'
-            value={productData.expiryDate ? productData.expiryDate.split('T')[0] : ''}
+            value={productData?.expiryDate ? productData.expiryDate.split('T')[0] : ''}
             onChange={e => onChange('expiryDate', e.target.value)}
             InputLabelProps={{ shrink: true }}
           />

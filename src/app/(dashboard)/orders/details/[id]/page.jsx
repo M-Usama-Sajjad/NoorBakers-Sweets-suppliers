@@ -38,7 +38,7 @@ export default function OrderDetailsPage() {
           throw new Error('No authentication token found');
         }
 
-        const response = await axios.get(`http://localhost:5001/api/orders/${id}`, {
+        const response = await axios.get(`/orders/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

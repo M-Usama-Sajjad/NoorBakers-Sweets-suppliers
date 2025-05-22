@@ -10,6 +10,8 @@ export function middleware(request) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('token')?.value
 
+  console.log("token", token, request.cookies)
+
   // Check if the path is for public assets
   if (publicAssets.some(assetPath => pathname.startsWith(assetPath))) {
     return NextResponse.next()

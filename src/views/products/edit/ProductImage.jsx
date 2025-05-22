@@ -66,7 +66,7 @@ const ProductImage = ({ onImageUpload }) => {
       const formData = new FormData()
       formData.append('image', file)
       const token = localStorage.getItem('token')
-      const response = await axios.post('http://localhost:5001/api/upload/upload', formData, {
+      const response = await axios.post('/upload/upload', formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

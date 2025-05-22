@@ -74,11 +74,11 @@ const NotificationDropdown = () => {
         if (!token) return;
 
         const [notifRes, unreadRes] = await Promise.all([
-          axios.get('http://localhost:5001/api/notifications', {
+          axios.get('/notifications', {
             headers: { Authorization: `Bearer ${token}` },
             params: { limit: 100 }
           }),
-          axios.get('http://localhost:5001/api/notifications/unread/count', {
+          axios.get('/notifications/unread/count', {
             headers: { Authorization: `Bearer ${token}` }
           })
         ]);
