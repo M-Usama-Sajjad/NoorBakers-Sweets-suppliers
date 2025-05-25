@@ -237,7 +237,7 @@ const NotificationDropdown = () => {
                       <Chip size='small' variant='tonal' color='primary' label={`${unreadCount} New`} />
                     )}
                     {notifications.length > 0 && (
-                      <Tooltip title={allRead ? 'Mark all as read' : 'Mark all as unread'} placement='left'>
+                      <Tooltip title={allRead ? 'Mark all as unread' : 'Mark all as read'} placement='left'>
                         <IconButton size='small' onClick={markAllRead} className='text-textPrimary'>
                           <i className={allRead ? 'tabler-mail' : 'tabler-mail-opened'} />
                         </IconButton>
