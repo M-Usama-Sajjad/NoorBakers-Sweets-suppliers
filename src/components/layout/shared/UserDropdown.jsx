@@ -25,6 +25,7 @@ import { useSelector } from 'react-redux'
 import Image from 'next/image'
 import { getInitials } from '@/utils/getInitials'
 import axios from '@/utils/axios'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -54,6 +55,8 @@ const UserDropdown = () => {
   // States
   const [open, setOpen] = useState(false)
 
+  const [loading, setLoading] = useState(false)
+
   // Refs
   const anchorRef = useRef(null)
 
@@ -78,10 +81,18 @@ const UserDropdown = () => {
   }
 
   const handleUserLogout = async () => {
-    localStorage.removeItem('token')
-    await axios.get('/auth/logout')
-    router.push('/login')
+    setLoading(true)
+    try {
+      await axios.get('/auth/logout')
+      localStorage.removeItem('token')
+      router.push('/login')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    } finally {
+      setLoading(false)
+    }
   }
+
   const user = useSelector(state => state?.auth?.user)
   const state = useSelector(state => state)
   console.log(user)
@@ -168,9 +179,9 @@ const UserDropdown = () => {
                   <MenuItemReplacement
                     className='mli-2 gap-3'
                     onClick={e => {
-                      e.stopPropagation();
-                      console.log("sent to profile");
-                      handleDropdownClose(e, '/user-profile');
+                      e.stopPropagation()
+                      console.log('sent to profile')
+                      handleDropdownClose(e, '/user-profile')
                     }}
                   >
                     <i className='tabler-user' />
@@ -179,9 +190,9 @@ const UserDropdown = () => {
                   <MenuItemReplacement
                     className='mli-2 gap-3'
                     onClick={e => {
-                      e.stopPropagation();
-                      console.log("sent to settings");
-                      handleDropdownClose(e, '/account-settings');
+                      e.stopPropagation()
+                      console.log('sent to settings')
+                      handleDropdownClose(e, '/account-settings')
                     }}
                   >
                     <i className='tabler-settings' />
@@ -201,11 +212,12 @@ const UserDropdown = () => {
                       variant='contained'
                       color='error'
                       size='small'
+                      disabled={loading}
                       endIcon={<i className='tabler-logout' />}
                       onClick={handleUserLogout}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
-                      Logout
+                      {loading ? <CircularProgress size={24} /> : 'Logout'}
                     </Button>
                   </div>
                 </MenuList>
