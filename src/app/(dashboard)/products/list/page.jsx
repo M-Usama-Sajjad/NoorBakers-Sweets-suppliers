@@ -37,10 +37,13 @@ const eCommerceProductsList = () => {
           type: product.type,
           sku: product.sku || 'N/A',
           qty: product.quantity,
-          status: product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
-          image: product?.productImage && product.productImage.startsWith('http')
-          ? product.productImage
-          : '/images/placeholder.png',          productBrand: product.productBrand || 'Unknown' // Placeholder
+          status:
+            product.status === 'active' ? 'Published' : product.status === 'expired' ? 'Inactive' : product.status,
+          image:
+            product?.productImage && product.productImage.startsWith('http')
+              ? product.productImage
+              : '/images/placeholder.png',
+          productBrand: product.productBrand || 'Unknown' // Placeholder
         }))
 
         setProducts(mappedProducts)
@@ -67,14 +70,11 @@ const eCommerceProductsList = () => {
           <ProductCard />
         </Grid>
         <Grid size={{ xs: 12 }}>
-        {loading ? <Loader message="Loading data..." />
-          : (
-            <ProductListTable productData={products} />
-          )}
+          {loading ? <Loader message='Loading data...' /> : <ProductListTable productData={products} />}
         </Grid>
       </Grid>
       <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleSnackbarClose}>
-        <Alert onClose={handleSnackbarClose} severity="error" sx={{ width: '100%' }}>
+        <Alert onClose={handleSnackbarClose} severity='error' sx={{ width: '100%' }}>
           {error}
         </Alert>
       </Snackbar>

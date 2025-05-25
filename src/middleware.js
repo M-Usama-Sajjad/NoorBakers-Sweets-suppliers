@@ -10,7 +10,10 @@ export function middleware(request) {
   const { pathname } = request.nextUrl
   const token = request.cookies.get('token')?.value
 
-  console.log("token", token, request.cookies)
+  // Redirect '/' to '/home' if token exists
+  if (pathname === '/' && token) {
+    return NextResponse.redirect(new URL('/home', request.url))
+  }
 
   // Check if the path is for public assets
   if (publicAssets.some(assetPath => pathname.startsWith(assetPath))) {
@@ -47,7 +50,7 @@ export const config = {
      * - assets (asset files)
      * - media (media files)
      * - fonts (font files)
-     * - favicon.ico (favicon file)
+     - favicon.ico (favicon file)
      */
     '/((?!api|_next/static|_next/image|_next/data|public|images|assets|media|fonts|favicon.ico).*)'
   ]

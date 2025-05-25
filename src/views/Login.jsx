@@ -17,6 +17,8 @@ import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
 
+import CircularProgress from '@mui/material/CircularProgress'
+
 // Third-party Imports
 import classnames from 'classnames'
 import axios from '@/utils/axios'
@@ -67,6 +69,7 @@ const LoginV2 = ({ mode }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   // Vars
   const darkImg = '/images/pages/auth-mask-dark.png'
@@ -86,32 +89,23 @@ const LoginV2 = ({ mode }) => {
 
   const handleLoginSubmit = async e => {
     e.preventDefault()
-    setError('') // Clear previous errors
-    console.log('Login form submitted:', { email, password })
+    setError('')
+    setIsLoading(true)
 
     try {
-      const response = await axios.post('/auth/login', {
-        email,
-        password
-      })
+      const response = await axios.post('/auth/login', { email, password })
 
-      // Check for status 200 or 201 and successful response
       if ((response.status === 200 || response.status === 201) && response.data.success) {
-        // Store token in localStorage
         localStorage.setItem('token', response.data.token)
-
-        // Dispatch login action to Redux store
         dispatch(login(response.data.token, response.data.user))
-
-        // Redirect to home page
         router.push('/home', undefined, { locale: false })
       } else {
-        // Display error message from server
         setError(response.data.message || 'Login failed. Please try again.')
       }
     } catch (err) {
-      // Handle non-200 status or network errors
       setError(err.response?.data?.message || 'An error occurred. Please try again later.')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -143,8 +137,6 @@ const LoginV2 = ({ mode }) => {
             className={classnames({ 'scale-x-[-1]': theme.direction === 'rtl' })}
           />
         )}
-
-
       </div>
       <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
         <Link className='absolute block-start-5 sm:block-start-[33px] inline-start-6 sm:inline-start-[38px]'>
@@ -195,11 +187,9 @@ const LoginV2 = ({ mode }) => {
                 Forgot password?
               </Typography>
             </div> */}
-            <Button fullWidth variant='contained' type='submit'>
-              Login to your account
+            <Button fullWidth variant='contained' type='submit' disabled={isLoading}>
+              {isLoading ? <CircularProgress size={24} color='white' /> : 'Login to your account'}
             </Button>
-           
-            
           </form>
         </div>
       </div>
