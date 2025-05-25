@@ -213,7 +213,7 @@ const UserDropdown = () => {
                       color='error'
                       size='small'
                       disabled={loading}
-                      endIcon={<i className='tabler-logout' />}
+                      endIcon={loading && <i className='tabler-logout' />}
                       onClick={handleUserLogout}
                       sx={{ '& .MuiButton-endIcon': { marginInlineStart: 1.5 } }}
                     >
