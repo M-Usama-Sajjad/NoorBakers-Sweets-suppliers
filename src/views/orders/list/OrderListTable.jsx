@@ -152,7 +152,7 @@ const OrderListTable = ({ orderData }) => {
         cell: ({ row }) => (
           <Typography
             component={Link}
-            href={`/orders/details/${row.original.order}`}
+            href={`/orders/details/${row.original.id}`}
             color='primary.main'
           >{`#${row.original.order}`}</Typography>
         )
@@ -170,8 +170,8 @@ const OrderListTable = ({ orderData }) => {
             {getAvatar({ avatar: row.original.avatar, customer: row.original.customer })}
             <div className='flex flex-col'>
               <Typography
-                component={Link}
-                href={'/customers/details/879861'}
+                // component={Link}
+                // href={'/customers/details/879861'}
                 color='text.primary'
                 className='font-medium hover:text-primary'
               >

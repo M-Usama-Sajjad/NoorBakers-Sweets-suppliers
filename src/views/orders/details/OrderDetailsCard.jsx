@@ -45,6 +45,7 @@ import Link from '@components/Link'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import { _isBetween } from 'chart.js/helpers'
+import Loader from '@/components/Loader'
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
@@ -106,18 +107,18 @@ const OrderTable = ({ orderData, order }) => {
           </div>
         )
       }),
-      columnHelper.accessor('price', {
-        header: 'Price',
-        cell: ({ row }) => <Typography>{`$${row.original.price.toFixed(2)}`}</Typography>
-      }),
+      // columnHelper.accessor('price', {
+      //   header: 'Price',
+      //   cell: ({ row }) => <Typography>{`$${row.original.price.toFixed(2)}`}</Typography>
+      // }),
       columnHelper.accessor('quantity', {
         header: 'Qty',
         cell: ({ row }) => <Typography>{`${row.original.quantity}`}</Typography>
       }),
-      columnHelper.accessor('total', {
-        header: 'Total',
-        cell: ({ row }) => <Typography>{`$${row.original.total}`}</Typography>
-      })
+      // columnHelper.accessor('total', {
+      //   header: 'Total',
+      //   cell: ({ row }) => <Typography>{`$${row.original.total}`}</Typography>
+      // })
     ],
     []
   )
@@ -266,7 +267,7 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
                 <FormControl size='small'>
                   <InputLabel>Status</InputLabel>
                   <Select
-                    value={newStatus}
+                    value={newStatus || 'pending'}
                     label='Status'
                     onChange={e => setNewStatus(e.target.value)}
                     disabled={updateLoading}
@@ -294,10 +295,11 @@ const OrderDetailsCard = ({ orderData, order, setOrderData }) => {
                 />
                 <Button
                   variant='contained'
+                  className='max-h-10'
                   onClick={handleUpdateStatus}
                   disabled={updateLoading || newStatus === updatedStatus || !changedBy}
                 >
-                  {updateLoading ? <CircularProgress size={24} /> : 'Update Status'}
+                  {updateLoading ? <Loader message='Status is updating...' style={{ width: '2px', height: '2px' }} /> : 'Update Status'}
                 </Button>
              </div>
           </Box>
